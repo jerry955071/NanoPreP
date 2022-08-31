@@ -137,7 +137,6 @@ with open(params["input_fq"], "r") as handle_in:
 
 
 # get stopping time 
-curr = datetime.now().strftime("%y%m%d%H%M%S")
 report_dict["stop time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 

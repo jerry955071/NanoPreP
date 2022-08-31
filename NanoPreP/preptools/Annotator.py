@@ -15,29 +15,29 @@ class Annotator(object):
         w: int,
         k: int
     ) -> None:
-        ### parse primer sequences
+        # parser of primer sequences
         prog5 = re.compile("(?P<p>[A-Z]+)(\{(?P<max_n>[0-9]*)\}(?P<n>[A-Z]))*")
         prog3 = re.compile("((?P<n>[A-Z])\{(?P<max_n>[0-9]*)\})*(?P<p>[A-Z]+)")
         polymers = {}
-        ## p5_sense
+
+        # p5_sense -> p5_sense, n, max_n
         p5_sense, n, max_n = \
             prog5.match(p5_sense).group("p", "n", "max_n")
         if n and max_n:
             polymers[(5, 1)] = (n, int(max_n))
-
-        ## p3_sense
+        # p3_sense -> p3_sense, n, max_n
         p3_sense, n, max_n = \
             prog3.match(p3_sense).group("p", "n", "max_n")
         if n and max_n:
             polymers[(3, 1)] = (n, int(max_n))
 
-        ## p5_antisense
+        # reverse_complement(p3_sense) -> p5_antisense
         p5_anti = SeqFastq.reverse_complement_static(p3_sense)
         if (3, 1) in polymers.keys():
             n, max_n = polymers[(3, 1)]
             polymers[(5, -1)] = (SeqFastq.reverse_complement_static(n), max_n)
 
-        ## p3_antisense
+        # reverse_complement(p5_sense) -> p3_antisense
         p3_anti = SeqFastq.reverse_complement_static(p5_sense)
         if (5, 1) in polymers.keys():
             n, max_n = polymers[(5, 1)]
@@ -55,10 +55,10 @@ class Annotator(object):
         self.w = w  # window size for polymer trimming
         self.k = k  # required number of polymers in the window
         self.poly = polymers
+        return
 
-        pass
-
-    def annotate(self, read: SeqFastq):
+    # annotate features on SeqFastq
+    def annotate(self, read: SeqFastq) -> None:
         # reset annot
         read.annot = SeqAnnot()
 
@@ -108,7 +108,7 @@ class Annotator(object):
         if read.annot.ploc5 > 0 and read.annot.ploc3 > 0:
             read.annot.full_length = 1
 
-        # identify homopolymers next to the primers
+        # identify homopolymers with `polyFinder``
         if self.poly:
             for (end, strand), (n, max_n) in self.poly.items():
                 # strand == read.annot.strand

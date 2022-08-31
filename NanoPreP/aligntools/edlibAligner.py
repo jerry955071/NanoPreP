@@ -1,6 +1,6 @@
 """Caller of edlib.align()"""
+from typing import Tuple
 import edlib
-
 
 class edlibAligner:
     def singleAlign(
@@ -9,7 +9,7 @@ class edlibAligner:
         mode: str,
         task: str,
         pid: float
-    ):
+    ) -> dict:
         # call edlib for the alignment
         res = edlib.align(
             query,
@@ -33,8 +33,9 @@ class edlibAligner:
         mode: str,
         task: str,
         pid: float
-    ):
+    ) -> Tuple[str, dict]:
         res = name = None
+        # iterate over querys to find the best-aligned query
         for qname, query in querys.items():
             new = edlibAligner.singleAlign(query, target, mode, task, pid)
             # the first alingment result

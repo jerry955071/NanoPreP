@@ -1,8 +1,10 @@
-"""Object to represent NanoPreP-styled FASTQ reads"""
+"""Object to represent NanoPreP-styled FASTQ records"""
+from typing import Tuple
 import numpy as np
 import re
 
 class SeqAnnot(object):
+    """Object to represent features (annotation) on NanoPreP-styled records"""
     def __init__(
         self,
         strand: float = 0,
@@ -25,7 +27,16 @@ class SeqAnnot(object):
         pass
 
     def __str__(self) -> str:
-        return "nanoprep: strand=%.2f full_length=%s fusion=%s ploc5=%s ploc3=%s poly5=%s poly3=%s" % (
+        return (
+            "nanoprep: "
+            "strand=%.2f "
+            "full_length=%s "
+            "fusion=%s "
+            "ploc5=%s "
+            "ploc3=%s "
+            "poly5=%s "
+            "poly3=%s"
+        ) % (
             self.strand * self.orientation,
             self.full_length,
             self.fusion,
@@ -58,7 +69,7 @@ class SeqAnnot(object):
         )
 
     @staticmethod
-    def from_id2(x: str) -> tuple:
+    def from_id2(x: str) -> Tuple[str, "SeqAnnot"]:
         program = re.compile(
             "(?P<prefix>.*)"
             "nanoprep: "
@@ -72,7 +83,7 @@ class SeqAnnot(object):
             "(?P<suffix>.*)"
         )
 
-        #
+        # match `x` with `program`
         res = program.match(x)
         if res:
             return res.group("prefix") + res.group("suffix"), \
@@ -92,7 +103,6 @@ class SeqAnnot(object):
 
 class SeqFastq(object):
     """Object to represent NanoPreP-styled FASTQ record"""
-
     def __init__(
         self,
         id: str = "",
@@ -125,7 +135,7 @@ class SeqFastq(object):
         return len(self.seq)
 
     @staticmethod
-    def reverse_complement_static(sequence):
+    def reverse_complement_static(sequence:str) -> str:
         base_complment = {
             "A": "T", "T": "A",
             "C": "G", "G": "C",
@@ -135,7 +145,7 @@ class SeqFastq(object):
             [base_complment[i] for i in sequence[::-1]]
         )
 
-    def reverse_complement(self):
+    def reverse_complement(self) -> None:
         # seq
         self.seq = SeqFastq.reverse_complement_static(self.seq)
 
@@ -172,9 +182,9 @@ class SeqFastq(object):
         self.annot.ploc3 = new["ploc3"]
         self.annot.poly5 = new["poly5"]
         self.annot.poly3 = new["poly3"]
-
         return
 
+    @staticmethod
     def parse(id, seq, id2, qual) -> object:
         # id
         id = id.lstrip("@").rstrip("\n")
@@ -185,15 +195,17 @@ class SeqFastq(object):
         # id2
         id2 = id2.lstrip("+").rstrip("\n")
         id2, annot = SeqAnnot.from_id2(id2)
-
         return SeqFastq(id, seq, id2, qual, annot)
 
     @staticmethod
     def meanq(read) -> float:
         if len(read) == 0:
             return 0
+        # ascii -> dec
         quals = [ord(i) - 33 for i in read.qual]
         quals = np.fromiter(quals, dtype=int, count=len(quals))
+        # q -> p -> mean p
         mean_p = np.mean(np.power(10, quals/-10))
+        # mean p -> mean q
         mean_q = -10 * np.log10(mean_p)
         return mean_q
