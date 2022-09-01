@@ -5,140 +5,160 @@ parser = ArgumentParser(description='Arguments availible to NanoPreP')
 
 # annotaion options
 parser.add_argument(
+    "--discard_lowq",
+    metavar="int",
+    type=int,
+    help="discard low-quality reads prior to any processing steps (default: -1)"
+)
+parser.add_argument(
+    "--discard_short",
+    metavar="int",
+    type=int,
+    help="discard too-short reads prior to any processing steps (default: -1)"
+)
+parser.add_argument(
     "--disable_annot",
     action="store_true",
-    help="disable annotation for NanoPreP-annotated FASTQ)"
+    help="use this flag to disable annotation"
 )
 parser.add_argument(
     "--p5_sense",
-    metavar="",
+    metavar="str",
     type=str,
     help="5' sense adatper/primer/polymer sequences"
 )
 parser.add_argument(
     "--p3_sense",
-    metavar="",
+    metavar="str",
     type=str,
     help="3' sense adatper/primer/polymer sequences"
 )
 parser.add_argument(
     "--isl5",
-    metavar="",
+    metavar="int",
     nargs=2,
     type=int,
-    help="ideal searching location for 5' adapter/primer sequences"
+    help="ideal searching location for 5' adapter/primer sequences "
+    "(e.g. 1 130)"
 )
 parser.add_argument(
     "--isl3",
-    metavar="",
+    metavar="int",
     nargs=2,
     type=int,
-    help="ideal searching location for 3' adapter/primer sequences"
+    help="ideal searching location for 3' adapter/primer sequences "
+    "(e.g. -60 -1)"
 )
 parser.add_argument(
     "--pid_isl",
-    metavar="",
+    metavar="float",
     type=float,
     help="adapter/primer percent identity cutoff (in ISL)"
 )
 parser.add_argument(
     "--pid_body",
-    metavar="",
+    metavar="float",
     type=float,
     help="adapter/primer percent identity cutoff (on read body)"
 )
 parser.add_argument(
     "--poly_w",
-    metavar="",
+    metavar="int",
     type=int,
     help="window size for homopolymer identification"
 )
 parser.add_argument(
     "--poly_k",
-    metavar="",
+    metavar="int",
     type=int,
     help="number of monomers to be expected in the window"
 )
 
 # processing (filtering/trimming/orientation) options
 parser.add_argument(
-    "--filter_short",
-    metavar="",
+    "--orientation",
+    metavar="int",
     default=0,
-    type=int,
-    help="filter too short reads after all trimming steps (default: 0)"
-)
-parser.add_argument(
-    "--filter_lowq",
-    metavar="",
-    default=-1,
-    type=int,
-    help="filter low-quality reads after all trimming steps (default: -1)"
-)
-parser.add_argument(
-    "--filter_fusion",
-    action="store_true",
-    help="filter fusion/chimeric reads"
-)
-parser.add_argument(
-    "--filter_truncated",
-    action="store_true",
-    help="filter truncated/non-full-length reads"
+    help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
 )
 parser.add_argument(
     "--trim_adapter",
     action="store_true",
-    help="trim adatper/primer sequences"
+    help="use this flag to trim adatper/primer sequences"
 )
 parser.add_argument(
     "--trim_poly",
     action="store_true",
-    help="trim homopolymers"
+    help="use this flag to trim homopolymers"
 )
 parser.add_argument(
-    "--orientation",
-    metavar="",
-    default=0,
-    help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
+    "--filter_short",
+    metavar="int",
+    type=int,
+    help="filter too short reads after all trimming steps (default: -1)"
+)
+parser.add_argument(
+    "--filter_lowq",
+    metavar="float",
+    type=int,
+    help="filter low-quality reads after all trimming steps (default: -1)"
 )
 
 # general options
+parser.add_argument(
+    "--mode",
+    metavar="[strandard|untrimmed|polyA|annotate]",
+    type=str,
+    help="use parameter presets "
+    "(can be overriden by `config` and command line arguments) "
+)
+parser.add_argument(
+    "--suffix_filtered",
+    metavar="str",
+    type=str,
+    help="suffix of filtered files"
+)
+parser.add_argument(
+    "--suffix_passed",
+    metavar="str",
+    type=str,
+    help="suffix of passed files"
+)
+parser.add_argument(
+    "--report",
+    metavar="PATH",
+    type=str,
+    help="file to output report (JSON)"
+)
+parser.add_argument(
+    "--config",
+    metavar="PATH",
+    type=str,
+    help="use the parameters in this config file (JSON)"
+    "(can be overriden by command line arguments)"
+)
+parser.add_argument(
+    "--output_fusion",
+    metavar="PATH",
+    type=str,
+    help="output fusion/chimeric reads to this file"
+)
+parser.add_argument(
+    "--output_truncated",
+    metavar="PATH",
+    type=str,
+    help="output truncated/non-full-length reads to this file"
+)
+parser.add_argument(
+    "--output_full_length",
+    metavar="PATH",
+    type=str,
+    help="output full-length reads to this file"
+)
 parser.add_argument(
     "input_fq",
     metavar="input.fq",
     type=str,
     help="input FASTQ (required)"
 )
-parser.add_argument(
-    "--output_filtered",
-    metavar="",
-    type=str,
-    help="output filter reads FASTQ"
-)
-parser.add_argument(
-    "--output_passed",
-    metavar="",
-    type=str,
-    help="output passed reads FASTQ"
-)
-parser.add_argument(
-    "--report",
-    metavar="",
-    type=str,
-    help="output report JSON file"
-)
-parser.add_argument(
-    "--config",
-    metavar="",
-    type=str,
-    help="provide parameters in JSON format "
-    "(can be overriden by command line arguments)"
-)
-parser.add_argument(
-    "--mode",
-    metavar="",
-    type=str,
-    help="presets of processing parameters "
-    "[strandard|untrimmed|polyA|annotate] "
-    "(can be overriden by `config` and command line arguments) "
-)
+

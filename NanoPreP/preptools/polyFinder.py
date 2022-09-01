@@ -1,7 +1,7 @@
 from seqtools.SeqFastq import SeqFastq
 
 class polyFinder:
-    # find homopolymers of `n` next to ploc5
+    # find the length of homopolymers `n` next to ploc5
     def lfind(
         read: SeqFastq,
         n: str,
@@ -27,7 +27,7 @@ class polyFinder:
         read.annot.poly5 = i + w - 1 - read.annot.ploc5
         return
 
-    # find homopolymers of `n` next to ploc3
+    # find the length of homopolymers `n` next to ploc3
     def rfind(
         read: SeqFastq,
         n: str,

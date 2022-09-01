@@ -1,5 +1,6 @@
 Params = {
     "standard": {
+        "discard_lowq": 7,
         "p5_sense": "TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG",
         "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC",
         "isl5": [0, 130],
@@ -8,13 +9,12 @@ Params = {
         "pid_body": 0.7,
         "poly_w": 6,
         "poly_k": 4,
-        "filter_short": 1,
-        "filter_lowq": 7,
-        "filter_fusion": True,
-        "filter_truncated": True,
+        "filter_short": 0,
         "trim_adapter": True,
         "trim_poly": True,
         "orientation": 1,
-        "report": "report.json"
+        "report": "report.json",
+        "suffix_passed": "passed",
+        "suffix_filtered": "filtered",
     }
 }
