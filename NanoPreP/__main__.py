@@ -38,7 +38,7 @@ for k, v in vars(args).items():
     elif k not in params.keys():
         params[k] = v
 
-# 
+# set default
 if not params["discard_short"]:
     params["discard_short"] = -1
 if not params["discard_lowq"]:
@@ -47,7 +47,6 @@ if not params["filter_short"]:
     params["filter_short"] = -1
 if not params["filter_lowq"]:
     params["filter_lowq"] = -1
-
 
 
 # initiate report dict
@@ -121,6 +120,10 @@ with open(params["input_fq"], "r") as handle_in:
         if params["discard_lowq"] > SeqFastq.meanq(read):
             continue
 
+        # skip too-short reads if `discard_short`
+        if params["discard_short"] > len(read):
+            continue
+
         PASS = "passed"
         # annotate reads
         if not params["disable_annot"]:
@@ -153,7 +156,7 @@ with open(params["input_fq"], "r") as handle_in:
         else:
             CLASS = "truncated"
         
-        # write to file if output file is assign
+        # write to file if output specified
         if handle_out[(CLASS, PASS)]:
             FastqIO.write(handle_out[(CLASS, PASS)], read)
 
@@ -163,6 +166,7 @@ with open(params["input_fq"], "r") as handle_in:
 
 # get the stopping time 
 report_dict["stop time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+
 
 # output report.json
 with open(params["report"], "w") as handle:
