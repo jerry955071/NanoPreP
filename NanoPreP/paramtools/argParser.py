@@ -6,15 +6,17 @@ parser = ArgumentParser(description='Arguments availible to NanoPreP')
 # annotaion options
 parser.add_argument(
     "--discard_lowq",
-    metavar="int",
-    type=int,
-    help="discard low-quality reads prior to any processing steps (default: -1)"
+    metavar="float",
+    default=-1,
+    type=float,
+    help="discard low-quality reads prior to all processing steps (default: -1)"
 )
 parser.add_argument(
     "--discard_short",
     metavar="int",
+    default=-1,
     type=int,
-    help="discard too-short reads prior to any processing steps (default: -1)"
+    help="discard too-short reads prior to all processing steps (default: -1)"
 )
 parser.add_argument(
     "--disable_annot",
@@ -79,6 +81,7 @@ parser.add_argument(
     "--orientation",
     metavar="int",
     default=0,
+    type=int,
     help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
 )
 parser.add_argument(
@@ -92,16 +95,18 @@ parser.add_argument(
     help="use this flag to trim homopolymers"
 )
 parser.add_argument(
-    "--filter_short",
-    metavar="int",
-    type=int,
-    help="filter too short reads after all trimming steps (default: -1)"
-)
-parser.add_argument(
     "--filter_lowq",
     metavar="float",
-    type=int,
+    default=-1,
+    type=float,
     help="filter low-quality reads after all trimming steps (default: -1)"
+)
+parser.add_argument(
+    "--filter_short",
+    metavar="int",
+    default=-1,
+    type=int,
+    help="filter too short reads after all trimming steps (default: -1)"
 )
 
 # general options
@@ -113,24 +118,6 @@ parser.add_argument(
     "(can be overriden by `config` and command line arguments) "
 )
 parser.add_argument(
-    "--suffix_filtered",
-    metavar="str",
-    type=str,
-    help="suffix of filtered files"
-)
-parser.add_argument(
-    "--suffix_passed",
-    metavar="str",
-    type=str,
-    help="suffix of passed files"
-)
-parser.add_argument(
-    "--report",
-    metavar="PATH",
-    type=str,
-    help="file to output report (JSON)"
-)
-parser.add_argument(
     "--config",
     metavar="PATH",
     type=str,
@@ -138,27 +125,40 @@ parser.add_argument(
     "(can be overriden by command line arguments)"
 )
 parser.add_argument(
+    "--report",
+    metavar="PATH",
+    type=str,
+    help="output report file (JSON)"
+)
+parser.add_argument(
     "--output_fusion",
     metavar="PATH",
     type=str,
-    help="output fusion/chimeric reads to this file"
+    help="output fusion/chimeric reads to this file (use '-' to output to stdout)"
 )
 parser.add_argument(
     "--output_truncated",
     metavar="PATH",
     type=str,
-    help="output truncated/non-full-length reads to this file"
+    help="output truncated/non-full-length reads to this file (use '-' to output to stdout)"
 )
 parser.add_argument(
     "--output_full_length",
     metavar="PATH",
     type=str,
-    help="output full-length reads to this file"
+    help="output full-length reads to this file (use '-' to output to stdout)"
+)
+parser.add_argument(
+    "--suffix_filtered",
+    metavar="str",
+    default=None,
+    type=str,
+    help="output filtered reads with the file suffix"
 )
 parser.add_argument(
     "input_fq",
     metavar="input.fq",
     type=str,
-    help="input FASTQ (required)"
+    help="input FASTQ"
 )
 
