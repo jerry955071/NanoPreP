@@ -23,7 +23,7 @@ class edlibAligner:
         if res["editDistance"] >= 0:
             res["pid"] = 1 - res["editDistance"] / len(query)
         else:
-            res["pid"] = 0
+            res["pid"] = -1
 
         return res
 
