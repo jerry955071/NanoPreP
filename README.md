@@ -1,8 +1,11 @@
-# NanoPreP: A fully-functional, fast and memory-efficient pre-processor for ONT transcriptomic data
+# NanoPreP
+## A fully-functional, fast and memory-efficient pre-processor for ONT transcriptomic data
+<br>  
 
 ## Requirements
-Python (>= 3.7)  
-edlib (1.3.8) for Python
+* Python (>= 3.7)  
+* edlib (1.3.8) for Python
+<br>  
 
 ## Getting started
 ```
@@ -10,31 +13,33 @@ git clone https://github.com/Woodformation1136/NanoPreP.git
 cd NanoPreP
 python NanoPreP --help
 ```
+<br>  
 
 ## NanoPreP workflow
 1. **Discard** low-quality/too-short reads (prior to all processing steps)
 2. **Annotate** features (locations of adapter/primer/polyA) on reads and **classify** reads into either fusion/chimeric, full-length or truncated    
 3. **Trim** adapter/primer/polyA sequences  
 4. **Filter** low-quality/too-short reads (after trimming)
+<br>  
 
-
-## Standard mode
+## General usage
 Use NanoPreP `standard` mode to get ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads
 ```
-$ python NanoPreP \
-    --mode standard \
-    --output_full_length output.fq \
-    --report report.json \
-    input.fq
+python NanoPreP \
+  --mode standard \
+  --output_full_length output.fq \
+  --report report.json \
+  input.fq
 ```
 - `--mode standard` ← run NanoPreP with `standard` mode (see section "Modes")  
 - `--output_full_length output.fq` ← output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads to `output.fq`  
 - `--report report.json` ← recording start/stop times, the paramters used, and the detail information of `input.fq` to `report.json`  
 - `input.fq` ← input FASTQ  
+<br>  
 
-
-## NanoPreP annotation
-An example of NanoPreP-annotated read
+## NanoPreP output
+#### TODO: why annotate reads? re-usable, time-saving, transparency, flexibility
+An example of NanoPreP output reads
 ```
 @read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=-1 poly3=0
 AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
@@ -42,15 +47,15 @@ AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
 +,),+'$)'%671*%('&$%......((&'(*($%$&%&$-((84*
 ```
 NanoPreP uses the following flags to annotate each read  
-|flag|type|default|explanation|
+|flag|regex|default|explanation|
 |:-|-|-|:-|
-|`strand`|[-]?[0-9]+[.]?[0-9]+|0|0: unknown, > 0: sense, < 0: antisense|
-|`full_length`|int|0|0: non-full-length, 1: full-length|
-|`fusion`|int|0|0: non-chimeric/-fusion, 1: chimeric/fusion|
-|`ploc5`|int|-1|-1: unknown, 0: removed, > 0: 5' adapter/primer location|
-|`ploc3`|int|-1|-1: unknown, 0: removed, > 0: 3' adapter/primer location|
-|`poly5`|int|-1|-1: unknown, 0: removed, > 0: 5' polymer length|
-|`poly3`|int|-1|-1: unknown, 0: removed, > 0: 3' polymer length|
+|`strand`|-?\d+\.\d*|0|0: unknown, > 0: sense, < 0: antisense|
+|`full_length`|[0\|1]|0|0: non-full-length, 1: full-length|
+|`fusion`|[0\|1]|0|0: non-chimeric/-fusion, 1: chimeric/fusion|
+|`ploc5`|-?\d+|-1|-1: unknown, 0: removed, > 0: 5' adapter/primer location|
+|`ploc3`|-?\d+|-1|-1: unknown, 0: removed, > 0: 3' adapter/primer location|
+|`poly5`|-?\d+|-1|-1: unknown, 0: removed, > 0: 5' polymer length|
+|`poly3`|-?\d+|-1|-1: unknown, 0: removed, > 0: 3' polymer length|
 
 
 ## Full usage
@@ -83,7 +88,6 @@ annotation options:
   --poly_w int          window size for homopolymer identification
   --poly_k int          number of monomers to be expected in the window
 
-
 processing (orient/trim/filter) options:
   --discard_lowq int    discard low-quality reads prior to all processing
                         steps (default: -1)
@@ -97,8 +101,6 @@ processing (orient/trim/filter) options:
                         (default: -1)
   --filter_short int    filter too short reads after all trimming steps
                         (default: -1)
-  
-
 
 general options:
   -h, --help            show this help message and exit
@@ -108,36 +110,40 @@ general options:
   --config PATH         use the parameters in this config file (JSON)(can be
                         overriden by command line arguments)
   --report PATH         output report file (JSON)
-  --output_fusion PATH  output fusion/chimeric reads to this file
+  --output_fusion PATH  output fusion/chimeric reads to this file (use '-'
+                        to output to stdout)
   --output_truncated PATH
-                        output truncated/non-full-length reads to this file
+                        output truncated/non-full-length reads to this file (use '-' to output to stdout)
   --output_full_length PATH
-                        output full-length reads to this file (default: stdout)
+                        output full-length reads to this file (use '-' to output to stdout)
   --suffix_filtered str
                         output filtered reads with the file suffix
 ```
 
-## Modes
-`--mode standard` : 
-  ```
-  --discard_lowq 7
-  --p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG
-  --p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC
-  --isl5 0 130
-  --isl3 -60 -1
-  --pid_isl 0.7
-  --pid_body 0.7
-  --poly_w 6
-  --poly_k 4
-  --filter_short 1
-  --trim_adapter
-  --trim_poly
-  --orientation 1
-  --report report.json
-  ```
+## Modes  
+NanoPreP provides several presets for different usages  
+### **`standard`**: output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads  
+   ```
+   python NanoPreP \
+    --mode standard \
+    --output_full_length output.fq \
+    --report report.json \
+    input.fq
+   ```
+### **`annotate`**: annotate without discarding/trimming/filtering reads
+   ```
+   python NanoPreP --mode annotate input.fq > annotated.fq
+   ```
+### **`report`**: generate report.json from NanoPreP-annotated FASTQ files
+   ```
+   python NanoPreP --mode report --report report.json annotated.fq 
+   ```
 
+Options used in each mode
+|mode|options|
+|:-|:-|
+|`standard`|```--discard_lowq 7 ```<br> ```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--filter_short 1``` <br>```--trim_adapter``` <br>```--trim_poly``` <br>```--orientation 1``` <br>```--output_full_length output.fq``` <br>```--report report.json```|
+|`annotate`|```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` ```--orientation 0``` <br>```--output_fusion -``` <br>```--output_truncated -``` <br>```--output_full_length -``` <br>```--report report.json```|
+|`report`|```--disable_annot```<br>```--report report.json```|
+<br>
 
-|mode|parameters|
-|-|-|
-|`standard`|```--discard_lowq 7 --p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG --p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC --isl5 0 130 --isl3 -60 -1 --pid_isl 0.7 --pid_body 0.7 --poly_w 6 --poly_k 4 --filter_short 1 --trim_adapter --trim_poly --orientation 1 --report report.json```|
-| d|d|
