@@ -16,7 +16,7 @@ class Annotator(object):
         k: int
     ) -> None:
         # parser of primer sequences
-        prog5 = re.compile("(?P<p>[A-Z]+)(\{(?P<max_n>[0-9]*)\}(?P<n>[A-Z]))*")
+        prog5 = re.compile("(?P<p>[A-Z]+)((?P<n>[A-Z])\{(?P<max_n>[0-9]*)\})*")
         prog3 = re.compile("((?P<n>[A-Z])\{(?P<max_n>[0-9]*)\})*(?P<p>[A-Z]+)")
         polymers = {}
 
@@ -64,7 +64,8 @@ class Annotator(object):
         read.annot = SeqAnnot()
 
         # detect fusion
-        if len(read.seq[self.isl5[1]:self.isl3[0]]) > 0:
+        if len(read) > \
+                (self.isl5[1] - self.isl5[0] + self.isl3[1] - self.isl3[0]):
             name, res = aligner.bestAlign(
                 {
                     "p5_sense": self.p5_sense,
@@ -77,7 +78,7 @@ class Annotator(object):
                 task="locations",
                 pid=self.pid_body
             )
-            if res["pid"] >= self.pid_body:
+            if res["pid"] != -1:
                 read.annot.fusion = 1
                 return
 
@@ -89,7 +90,7 @@ class Annotator(object):
             task="locations",
             pid=self.pid_isl
         )
-        if res["pid"] >= self.pid_isl:
+        if res["pid"] != -1:
             read.annot.ploc5 = res["locations"][-1][-1] + self.isl5[0]
             read.annot.strand += round(strand * res["pid"] * .5, 2)
             strand5 = strand
@@ -102,7 +103,7 @@ class Annotator(object):
             task="locations",
             pid=self.pid_isl
         )
-        if res["pid"] >= self.pid_isl:
+        if res["pid"] != -1:
             read.annot.ploc3 = res["locations"][0][0] + \
                 self.isl3[0] + len(read.seq)
             read.annot.strand += round(strand * res["pid"] * .5, 2)
