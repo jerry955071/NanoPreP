@@ -28,7 +28,6 @@ class SeqAnnot(object):
 
     def __str__(self) -> str:
         return (
-            "nanoprep: "
             "strand=%.2f "
             "full_length=%s "
             "fusion=%s "
@@ -69,18 +68,17 @@ class SeqAnnot(object):
         )
 
     @staticmethod
-    def from_id2(x: str) -> Tuple[str, "SeqAnnot"]:
+    def from_id(x: str) -> Tuple[str, "SeqAnnot"]:
         program = re.compile(
-            "(?P<prefix>.*)"
-            "nanoprep: "
-            "strand=(?P<strand>[-]?[\d]+[.][\d]+) "
-            "full_length=(?P<full_length>[0|1]) "
-            "fusion=(?P<fusion>[0|1]) "
-            "ploc5=(?P<ploc5>[-]?[\d]+) "
-            "ploc3=(?P<ploc3>[-]?[\d]+) "
-            "poly5=(?P<poly5>[-]?[\d]+)"
-            "poly3=(?P<poly3>[-]?[\d]+)"
-            "(?P<suffix>.*)"
+            r"(?P<prefix>.*)"
+            r"strand=(?P<strand>-?\d+\.\d*) "
+            r"full_length=(?P<full_length>[01]) "
+            r"fusion=(?P<fusion>[01]) "
+            r"ploc5=(?P<ploc5>-?\d+) "
+            r"ploc3=(?P<ploc3>-?\d+) "
+            r"poly5=(?P<poly5>-?\d+) "
+            r"poly3=(?P<poly3>-?\d+)"
+            r"(?P<suffix>.*)"
         )
 
         # match `x` with `program`
@@ -119,12 +117,12 @@ class SeqFastq(object):
         pass
 
     def __str__(self) -> str:
-        space = " " if self.id2 else ""
-        return "@%s\n%s\n+%s%s\n%s\n" % (
-            self.id,
-            self.seq,
-            self.id2 + space,
+        space = " " if self.id else ""
+        return "@%s%s\n%s\n+%s\n%s\n" % (
+            self.id + space,
             self.annot,
+            self.seq,
+            self.id2,
             self.qual
         )
 
@@ -169,11 +167,11 @@ class SeqFastq(object):
         else:
             new["ploc5"] = self.annot.ploc3
         if self.annot.poly5 > 0:
-            new["poly3"] = len(self.seq) - self.annot.poly5
+            new["poly3"] = self.annot.poly5
         else:
             new["poly3"] = self.annot.poly5
         if self.annot.poly3 > 0:
-            new["poly5"] = len(self.seq) - self.annot.poly3
+            new["poly5"] = self.annot.poly3
         else:
             new["poly5"] = self.annot.poly3
 
@@ -188,13 +186,13 @@ class SeqFastq(object):
     def parse(id, seq, id2, qual) -> object:
         # id
         id = id.lstrip("@").rstrip("\n")
+        id, annot = SeqAnnot.from_id(id)
         # seq
         seq = seq.strip()
         # qual
         qual = qual.strip()
         # id2
         id2 = id2.lstrip("+").rstrip("\n")
-        id2, annot = SeqAnnot.from_id2(id2)
         return SeqFastq(id, seq, id2, qual, annot)
 
     @staticmethod
