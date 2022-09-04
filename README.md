@@ -1,5 +1,5 @@
 # NanoPreP
-## A fully-functional, fast and memory-efficient pre-processor for ONT transcriptomic data
+NanoPreP is a fully-functional, fast, memory-efficient pre-processor for ONT transcriptomic data
 <br>  
 
 ## Requirements
@@ -15,11 +15,11 @@ python NanoPreP --help
 ```
 <br>  
 
-## NanoPreP workflow
+## Workflow
 1. **Discard** low-quality/too-short reads (prior to all processing steps)
-2. **Annotate** features (locations of adapter/primer/polyA) on reads and **classify** reads into either fusion/chimeric, full-length or truncated    
+2. **Annotate** features (locations of adapter/primer/polyA) and identities (fusion/full-length/truncated) of reads     
 3. **Trim** adapter/primer/polyA sequences  
-4. **Filter** low-quality/too-short reads (after trimming)
+4. **Filter** low-quality/too-short reads before output to assigned files
 <br>  
 
 ## General usage
@@ -39,7 +39,6 @@ python NanoPreP \
 
 ## NanoPreP output
 #### TODO: why annotate reads? re-usable, time-saving, transparency, flexibility
-An example of NanoPreP output reads
 ```
 @read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=-1 poly3=0
 AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
@@ -56,9 +55,38 @@ NanoPreP uses the following flags to annotate each read
 |`ploc3`|-?\d+|-1|-1: unknown, 0: removed, > 0: 3' adapter/primer location|
 |`poly5`|-?\d+|-1|-1: unknown, 0: removed, > 0: 5' polymer length|
 |`poly3`|-?\d+|-1|-1: unknown, 0: removed, > 0: 3' polymer length|
+<br>
+
+## Modes  
+NanoPreP provides several presets for different usages  
+**`standard`**: output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads  
+   ```
+   python NanoPreP \
+    --mode standard \
+    --output_full_length output.fq \
+    --report report.json \
+    input.fq
+   ```
+**`annotate`**: annotate without discarding/trimming/filtering reads
+   ```
+   python NanoPreP --mode annotate input.fq > annotated.fq
+   ```
+**`report`**: generate report.json from NanoPreP-annotated FASTQ files
+   ```
+   python NanoPreP --mode report --report report.json annotated.fq 
+   ```
+
+Options used in each mode
+|mode|options|
+|:-|:-|
+|`standard`|```--discard_lowq 7 ```<br> ```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--filter_short 1``` <br>```--trim_adapter``` <br>```--trim_poly``` <br>```--orientation 1``` <br>```--output_full_length output.fq``` <br>```--report report.json```|
+|`annotate`|```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` ```--orientation 0``` <br>```--output_fusion -``` <br>```--output_truncated -``` <br>```--output_full_length -``` <br>```--report report.json```|
+|`report`|```--disable_annot```<br>```--report report.json```|
+<br>
 
 
-## Full usage
+
+## Options
 ```
 usage: NanoPreP [-h] [--discard_lowq int] [--discard_short int]
                 [--disable_annot] [--p5_sense str] [--p3_sense str]
@@ -119,31 +147,3 @@ general options:
   --suffix_filtered str
                         output filtered reads with the file suffix
 ```
-
-## Modes  
-NanoPreP provides several presets for different usages  
-### **`standard`**: output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads  
-   ```
-   python NanoPreP \
-    --mode standard \
-    --output_full_length output.fq \
-    --report report.json \
-    input.fq
-   ```
-### **`annotate`**: annotate without discarding/trimming/filtering reads
-   ```
-   python NanoPreP --mode annotate input.fq > annotated.fq
-   ```
-### **`report`**: generate report.json from NanoPreP-annotated FASTQ files
-   ```
-   python NanoPreP --mode report --report report.json annotated.fq 
-   ```
-
-Options used in each mode
-|mode|options|
-|:-|:-|
-|`standard`|```--discard_lowq 7 ```<br> ```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--filter_short 1``` <br>```--trim_adapter``` <br>```--trim_poly``` <br>```--orientation 1``` <br>```--output_full_length output.fq``` <br>```--report report.json```|
-|`annotate`|```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` ```--orientation 0``` <br>```--output_fusion -``` <br>```--output_truncated -``` <br>```--output_full_length -``` <br>```--report report.json```|
-|`report`|```--disable_annot```<br>```--report report.json```|
-<br>
-
