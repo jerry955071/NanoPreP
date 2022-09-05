@@ -1,6 +1,6 @@
 Params = {
     "standard": {
-        "discard_lowq": 7,
+        "skip_lowq": 7,
         "p5_sense": "TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG",
         "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC",
         "isl5": [0, 130],
@@ -36,8 +36,8 @@ Params = {
     }
 }
 Defaults = {
-    "discard_lowq": -1,
-    "discard_short": -1,
+    "skip_lowq": -1,
+    "skip_short": -1,
     "disable_annot": False,
     "p5_sense": None,
     "p3_sense": None,

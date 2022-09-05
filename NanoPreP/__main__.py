@@ -45,7 +45,7 @@ for k, v in vars(args).items():
 report_dict = {
     "start time": datetime.now().strftime("%Y/%m/%d-%H:%M:%S"),
     "total reads": 0,
-    "discarded": 0,
+    "skipped": 0,
     "fusion": {
         "passed": 0,
         "filtered": 0
@@ -116,14 +116,14 @@ with open(params["input_fq"], "r") as handle_in:
         # add read count
         report_dict["total reads"] += 1
 
-        # skip too-short reads if `discard_short`
-        if params["discard_short"] > len(read):
-            report_dict["discarded"] += 1
+        # skip too-short reads if `skip_short`
+        if params["skip_short"] > len(read):
+            report_dict["skipped"] += 1
             continue
 
-        # skip low-quality reads if `discard_lowq` 
-        if params["discard_lowq"] > SeqFastq.meanq(read):
-            report_dict["discarded"] += 1
+        # skip low-quality reads if `skip_lowq` 
+        if params["skip_lowq"] > SeqFastq.meanq(read):
+            report_dict["skipped"] += 1
             continue
 
         PASS = "passed"

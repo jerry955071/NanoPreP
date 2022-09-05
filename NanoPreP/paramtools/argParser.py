@@ -5,18 +5,18 @@ parser = ArgumentParser(description='Arguments availible to NanoPreP')
 
 # annotaion options
 parser.add_argument(
-    "--discard_lowq",
+    "--skip_lowq",
     metavar="float",
     default=-1,
     type=float,
-    help="discard low-quality reads prior to all processing steps (default: -1)"
+    help="skip the annotation of low-quality reads (default: -1)"
 )
 parser.add_argument(
-    "--discard_short",
+    "--skip_short",
     metavar="int",
     default=-1,
     type=int,
-    help="discard too-short reads prior to all processing steps (default: -1)"
+    help="skip the annotation of too-short reads (default: -1)"
 )
 parser.add_argument(
     "--disable_annot",
