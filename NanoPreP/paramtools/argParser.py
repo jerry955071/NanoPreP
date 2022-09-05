@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-
+# TODO: separate each section of the options 
 # initiate ArgumentParser
 parser = ArgumentParser(description='Arguments availible to NanoPreP')
 
@@ -78,13 +78,6 @@ parser.add_argument(
 
 # processing (filtering/trimming/orientation) options
 parser.add_argument(
-    "--orientation",
-    metavar="int",
-    default=0,
-    type=int,
-    help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
-)
-parser.add_argument(
     "--trim_adapter",
     action="store_true",
     help="use this flag to trim adatper/primer sequences"
@@ -107,6 +100,13 @@ parser.add_argument(
     default=-1,
     type=int,
     help="filter too short reads after all trimming steps (default: -1)"
+)
+parser.add_argument(
+    "--orientation",
+    metavar="int",
+    default=0,
+    type=int,
+    help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
 )
 
 # general options
@@ -134,26 +134,26 @@ parser.add_argument(
     "--output_fusion",
     metavar="PATH",
     type=str,
-    help="output fusion/chimeric reads to this file (use '-' to output to stdout)"
+    help="output fusion/chimeric reads to this file (use '-' for stdout)"
 )
 parser.add_argument(
     "--output_truncated",
     metavar="PATH",
     type=str,
-    help="output truncated/non-full-length reads to this file (use '-' to output to stdout)"
+    help="output truncated/non-full-length reads to this file (use '-' for stdout)"
 )
 parser.add_argument(
     "--output_full_length",
     metavar="PATH",
     type=str,
-    help="output full-length reads to this file (use '-' to output to stdout)"
+    help="output full-length reads to this file (use '-' for stdout)"
 )
 parser.add_argument(
     "--suffix_filtered",
     metavar="str",
     default=None,
     type=str,
-    help="output filtered reads with the file suffix"
+    help="output filtered reads with the suffix"
 )
 parser.add_argument(
     "input_fq",
