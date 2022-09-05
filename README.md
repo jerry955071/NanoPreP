@@ -68,8 +68,7 @@ As shown in the example above, several flags are used for the annotation:
 
 According to the annotation, the example "read1" is a sense strand (`strand=0.91`), full-length (`full_length=1`), non-chimeric (`fusion=0`),  adapter/primer removed (`ploc5=0 ploc3=0`), and polyA removed (`poly3=0`) read.
 
-## Modes  
-<a id="Modes"></a>
+## Modes <a id="Modes"></a>
 In addition to the `standard` mode, NanoPreP also provides other `mode` options for different usages:  
 1. **`standard`**: output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads  
    ```
@@ -96,8 +95,7 @@ Each `mode` option applies multiple options at the same time, which can be detai
 |`report`|```--disable_annot```<br>```--report report.json```|
 <br>
 
-## How to specify adapter/primer/polyA sequences
-<a id="HOWTO"></a>
+## How to specify adapter/primer/polyA sequences <a id="HOWTO"></a>
 To perform read annotation, adapter/primer/polyA sequences are required, which can be specified using options `p5_sense` and `p3_sense`. NanoPreP required users to provide adapter/primer/polyA sequences on the sense strand in the 5' to 3' direction. 
 
 For example, the following command means that the 5' and 3' adatper/primer sequences on the sense strand are 'CCCCC' and 'GGGGG', respectively, and there are polyA tails (maximum length = 20) next to 3' adapter/primers.
