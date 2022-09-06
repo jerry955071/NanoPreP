@@ -13,9 +13,9 @@ python NanoPreP --help
 
 ## How NanoPreP works
 ### **Read annotation**  
-NanoPreP first annotates **locations of adapter/primer and polyA(T)** on each input read using a **"local-searching"** method, and classifies each read as either **fusion, full-length or truncated** based on the adapter/primer locations.  
+NanoPreP first annotates **locations of adapter/primer and polyA/T** on each input read using a **"local-searching"** method, and classifies each read as either **fusion, full-length or truncated** based on the adapter/primer locations.  
 
-For the **"local-searching"** method, adapter/primer sequences (see section [How to specify adapter/primer/polyA sequences](#HOWTO)) are aligned to both (1) the **"ideal searching locations"** for adapter/primer (`isl5` and `isl3`) and (2) the **"read body"** between 5' and 3' ideal searching locations.
+For the **"local-searching"** method, adapter/primer sequences (see section [How to specify adapter/primer and polyA/T sequences](#HOWTO)) are aligned to both (1) the **"ideal searching locations"** for adapter/primer (`isl5` and `isl3`) and (2) the **"read body"** between 5' and 3' ideal searching locations.
 
 Based on the alignment hits of adapter/primer, each read can be classified into one of the three categories:  
 1. **Fusion/chimeric**: reads with a adapter/primer hit on the **"read body"**
@@ -27,7 +27,7 @@ During the annotation step, user can decide to skip low-quality or too-short rea
 ### **Read processing: trimming, filtering and re-orientation**
 After the annotation steps, **trimming**, **filtering** and **orientation** can be performed on each read. 
 - **Trimming** of adapter/primer and polyA/T sequences can be applied with the flags `--trim_adapter` and `--trim_poly`.  
-- **Filtering** of low-quality or too-short sequences can be performed using options `--filter_lowq` and `--filter_short` with desired cutoff values.   
+- **Filtering** of low-quality or too-short sequences (after trimming) can be performed using options `--filter_lowq` and `--filter_short` with desired cutoff values.   
 - **Orientation** of read strand to sense or antisense can be performed using option `--orientation`.
 
 ### **Read output**
@@ -78,7 +78,7 @@ In addition to the `standard` mode, NanoPreP also provides other `mode` options 
     --report report.json \
     input.fq
    ```
-2. **`annotate`**: annotate without discarding/trimming/filtering reads
+2. **`annotate`**: annotate without skipping/discarding/trimming/filtering reads
    ```
    python NanoPreP --mode annotate input.fq > annotated.fq
    ```
@@ -95,15 +95,21 @@ Each `mode` option applies multiple options at the same time, which can be detai
 |`report`|```--disable_annot```<br>```--report report.json```|
 <br>
 
-## How to specify adapter/primer/polyA sequences <a id="HOWTO"></a>
-To perform read annotation, adapter/primer/polyA sequences are required, which can be specified using options `p5_sense` and `p3_sense`. NanoPreP required users to provide adapter/primer/polyA sequences on the sense strand in the 5' to 3' direction. 
+## How to specify adapter/primer and polyA/T sequences <a id="HOWTO"></a>
+To perform read annotation, **adapter/primer** and **polyA/T** (if provided) sequences on the **sense strand** can be specified using options `--p5_sense` and `--p3_sense`. 
 
-For example, the following command means that the 5' and 3' adatper/primer sequences on the sense strand are 'CCCCC' and 'GGGGG', respectively, and there are polyA tails (maximum length = 20) next to 3' adapter/primers.
+For example, the following command means that the 5' and 3' adatper/primer sequences on the sense strand are 'CATTC' and 'GACTA', respectively.
 ```
---p5_sense CCCCC --p3_sense A{20}GGGGG
+--p5_sense CATTC --p3_sense GACTA
 ```
+If users wish to detect polyA/T tails, a pattern `N{M}` can be used to specify the location and length of polyA/T tails:
+```
+--p5_sense CATTC --p3_sense A{50}GACTA
+```
+The aboved command means that there are poly`"A"` tails of maximum length `"50"` bp next to the 3' adapters/primers.
 
-## Full usage of NanoPreP
+
+## Full usage
 ```
 usage: NanoPreP [-h] [--discard_lowq int] [--discard_short int]
                 [--disable_annot] [--p5_sense str] [--p3_sense str]
@@ -111,7 +117,7 @@ usage: NanoPreP [-h] [--discard_lowq int] [--discard_short int]
                 [--pid_body float] [--poly_w int] [--poly_k int]
                 [--orientation int] [--trim_adapter] [--trim_poly]
                 [--filter_short int] [--filter_lowq float]
-                [--mode [strandard|untrimmed|polyA|annotate]]
+                [--mode [strandard|annotate|report]]
                 [--suffix_filtered str] [--report PATH] [--config PATH]
                 [--output_fusion PATH] [--output_truncated PATH]
                 [--output_full_length PATH]
@@ -119,6 +125,15 @@ usage: NanoPreP [-h] [--discard_lowq int] [--discard_short int]
 
 positional arguments:
   input.fq              input FASTQ  
+
+general options:
+  -h, --help            show this help message and exit
+  --mode [strandard|annotate|report]
+                        use parameter presets (can be overriden by `config`
+                        and command line arguments)
+  --config PATH         use the parameters in this config file (JSON)(can be
+                        overriden by command line arguments)
+  --report PATH         output report file (JSON)
 
 annotation options:
   --skip_lowq float     skip the annotation of low-quality reads (default: -1)
@@ -135,7 +150,7 @@ annotation options:
   --poly_w int          window size for homopolymer identification
   --poly_k int          number of monomers to be expected in the window
 
-processing (orient/trim/filter) options:
+processing (trimming/filtering/orientation) options:
   --trim_adapter        use this flag to trim adatper/primer sequences
   --trim_poly           use this flag to trim homopolymers
   --filter_lowq float   filter low-quality reads after all trimming steps
@@ -144,14 +159,7 @@ processing (orient/trim/filter) options:
                         (default: -1)
   --orientation int     re-orient reads (0: generic (default), 1: sense, -1:
                         antisense)
-general options:
-  -h, --help            show this help message and exit
---mode [strandard|untrimmed|polyA|annotate]
-                        use parameter presets (can be overriden by `config`
-                        and command line arguments)
-  --config PATH         use the parameters in this config file (JSON)(can be
-                        overriden by command line arguments)
-  --report PATH         output report file (JSON)
+output options:
   --output_fusion PATH  output fusion/chimeric reads to this file (use '-' for
                         stdout)
   --output_truncated PATH
