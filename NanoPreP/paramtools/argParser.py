@@ -3,25 +3,55 @@ from argparse import ArgumentParser
 # initiate ArgumentParser
 parser = ArgumentParser(description='Arguments availible to NanoPreP')
 
+# positional arguments
+parser.add_argument(
+    "input_fq",
+    metavar="input.fq",
+    type=str,
+    help="input FASTQ"
+)
+
+# general options
+parser.add_argument(
+    "--mode",
+    metavar="[strandard|annotate|report]",
+    type=str,
+    help="use parameter presets "
+    "(can be overriden by `config` and command line arguments) "
+)
+parser.add_argument(
+    "--config",
+    metavar="PATH",
+    type=str,
+    help="use the parameters in this config file (JSON)"
+    "(can be overriden by command line arguments)"
+)
+parser.add_argument(
+    "--report",
+    metavar="PATH",
+    type=str,
+    help="output report file (JSON)"
+)
+
 # annotaion options
+parser.add_argument(
+    "--disable_annot",
+    action="store_true",
+    help="use this flag to disable annotation"
+)
 parser.add_argument(
     "--skip_lowq",
     metavar="float",
     default=-1,
     type=float,
-    help="skip the annotation of low-quality reads (default: -1)"
+    help="skip low-quality reads (default: -1)"
 )
 parser.add_argument(
     "--skip_short",
     metavar="int",
     default=-1,
     type=int,
-    help="skip the annotation of too-short reads (default: -1)"
-)
-parser.add_argument(
-    "--disable_annot",
-    action="store_true",
-    help="use this flag to disable annotation"
+    help="skip too-short reads (default: -1)"
 )
 parser.add_argument(
     "--p5_sense",
@@ -109,27 +139,7 @@ parser.add_argument(
     help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
 )
 
-# general options
-parser.add_argument(
-    "--mode",
-    metavar="[strandard|untrimmed|polyA|annotate]",
-    type=str,
-    help="use parameter presets "
-    "(can be overriden by `config` and command line arguments) "
-)
-parser.add_argument(
-    "--config",
-    metavar="PATH",
-    type=str,
-    help="use the parameters in this config file (JSON)"
-    "(can be overriden by command line arguments)"
-)
-parser.add_argument(
-    "--report",
-    metavar="PATH",
-    type=str,
-    help="output report file (JSON)"
-)
+# output options
 parser.add_argument(
     "--output_fusion",
     metavar="PATH",
@@ -155,10 +165,3 @@ parser.add_argument(
     type=str,
     help="output filtered reads with the suffix"
 )
-parser.add_argument(
-    "input_fq",
-    metavar="input.fq",
-    type=str,
-    help="input FASTQ"
-)
-
