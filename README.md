@@ -159,6 +159,7 @@ processing (trimming/filtering/orientation) options:
                         (default: -1)
   --orientation int     re-orient reads (0: generic (default), 1: sense, -1:
                         antisense)
+                        
 output options:
   --output_fusion PATH  output fusion/chimeric reads to this file (use '-' for
                         stdout)
