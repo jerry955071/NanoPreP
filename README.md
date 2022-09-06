@@ -24,7 +24,7 @@ Based on the alignment hits of adapter/primer, each read can be classified into 
 
 During the annotation step, user can decide to skip low-quality or too-short reads using options `--skip_lowq` and `--skip_short` with the desired cutoff values, respectively. The skipped reads will not be annotated and will not be included in the final output file.
 
-### **Read processing: trimming, filtering and re-orientation**
+### **Read processing: trimming, filtering and orientation**
 After the annotation steps, **trimming**, **filtering** and **orientation** can be performed on each read. 
 - **Trimming** of adapter/primer and polyA/T sequences can be applied with the flags `--trim_adapter` and `--trim_poly`.  
 - **Filtering** of low-quality or too-short sequences (after trimming) can be performed using options `--filter_lowq` and `--filter_short` with desired cutoff values.   
@@ -78,7 +78,7 @@ In addition to the `standard` mode, NanoPreP also provides other `mode` options 
     --report report.json \
     input.fq
    ```
-2. **`annotate`**: annotate without skipping/discarding/trimming/filtering reads
+2. **`annotate`**: annotate without skipping/trimming/filtering/orienting reads
    ```
    python NanoPreP --mode annotate input.fq > annotated.fq
    ```
@@ -106,7 +106,7 @@ If users wish to detect polyA/T tails, a pattern `N{M}` can be used to specify t
 ```
 --p5_sense CATTC --p3_sense A{50}GACTA
 ```
-The aboved command means that there are poly`"A"` tails of maximum length `"50"` bp next to the 3' adapters/primers.
+The command above means that there are poly`"A"` tails of maximum length `"50"` bp next to the 3' adapters/primers.
 
 
 ## Full usage
