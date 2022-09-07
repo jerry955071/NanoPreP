@@ -19,7 +19,7 @@ For the **"local-searching"** method, adapter/primer sequences (see section [How
 
 Based on the alignment hits of adapter/primer, each read can be classified into one of the three categories:  
 1. **Fusion/chimeric**: reads with a adapter/primer hit on the **"read body"**
-2. **Full-length**: reads that are not **fusion/chimeric** and posse both **5' and 3' adapters/primers** on **5' and 3' "ideal searching locations"**, respecitvely.
+2. **Full-length**: reads that are not **fusion/chimeric** and possess both **5' and 3' adapters/primers** on **5' and 3' "ideal searching locations"**, respecitvely.
 3. **Truncated**: reads that are not **fusion/chimeric** and not **full-length**.  
 
 During the annotation step, user can decide to skip low-quality or too-short reads using options `--skip_lowq` and `--skip_short` with the desired cutoff values, respectively. The skipped reads will not be annotated and will not be included in the final output file.
