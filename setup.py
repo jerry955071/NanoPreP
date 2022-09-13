@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="nanoprep-ffm",
-    version="0.0.2",
+    version="0.0.3",
     author="Chia-Chen Chu",
     author_email="jerry955071@gmail.com",
     description="A fully-equipped, fast, and memory-efficient pre-processor for ONT transcriptomic data",
