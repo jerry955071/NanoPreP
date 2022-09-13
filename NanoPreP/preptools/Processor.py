@@ -1,4 +1,4 @@
-from seqtools.SeqFastq import SeqFastq
+from NanoPreP.seqtools.SeqFastq import SeqFastq
 
 class Processor:
     def trimmer(

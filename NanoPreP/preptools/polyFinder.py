@@ -1,4 +1,4 @@
-from seqtools.SeqFastq import SeqFastq
+from NanoPreP.seqtools.SeqFastq import SeqFastq
 
 class polyFinder:
     # find the length of homopolymers `n` next to ploc5
