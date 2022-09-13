@@ -42,7 +42,7 @@ For the output options, user can choose to output **fusion/chimeric**, **full-le
 ## General usage
 Use NanoPreP with the `standard` mode to get ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads:
 ```
-python NanoPreP \
+nanoprep \
   --mode standard \
   --output_full_length output.fq \
   --report report.json \
@@ -78,7 +78,7 @@ According to the annotation, the example "read1" is a sense strand (`strand=0.91
 In addition to the `standard` mode, NanoPreP also provides other `mode` options for different usages:  
 1. **`standard`**: output ***high-quality, non-chimeric, full-length, strand-oriented, adapter/primer-removed, polyA-removed*** reads  
    ```
-   python NanoPreP \
+   nanoprep \
     --mode standard \
     --output_full_length output.fq \
     --report report.json \
@@ -86,11 +86,11 @@ In addition to the `standard` mode, NanoPreP also provides other `mode` options 
    ```
 2. **`annotate`**: annotate without skipping/trimming/filtering/orienting reads
    ```
-   python NanoPreP --mode annotate input.fq > annotated.fq
+   nanoprep --mode annotate input.fq > annotated.fq
    ```
 3. **`report`**: generate report.json from NanoPreP-annotated FASTQ files
    ```
-   python NanoPreP --mode report --report report.json annotated.fq 
+   nanoprep --mode report --report report.json annotated.fq 
    ```
 
 Each `mode` option applies multiple options at the same time, which can be detailed as follows:
