@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="nanoprep-ccc",
-    version="0.0.1",
+    name="nanoprep-ffm",
+    version="0.0.2",
     author="Chia-Chen Chu",
     author_email="jerry955071@gmail.com",
     description="A fully-equipped, fast, and memory-efficient pre-processor for ONT transcriptomic data",
