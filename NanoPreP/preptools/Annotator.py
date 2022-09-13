@@ -1,6 +1,6 @@
-from seqtools.SeqFastq import SeqFastq, SeqAnnot
-from aligntools.edlibAligner import edlibAligner as aligner
-from preptools.polyFinder import polyFinder
+from NanoPreP.seqtools.SeqFastq import SeqFastq, SeqAnnot
+from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
+from NanoPreP.preptools.polyFinder import polyFinder
 import re
 
 class Annotator(object):
@@ -78,7 +78,7 @@ class Annotator(object):
                 task="locations",
                 pid=self.pid_body
             )
-            if res["pid"] != -1:
+            if res["pid"] > 0:
                 read.annot.fusion = 1
                 return
 
@@ -90,7 +90,7 @@ class Annotator(object):
             task="locations",
             pid=self.pid_isl
         )
-        if res["pid"] != -1:
+        if res["pid"] > 0:
             read.annot.ploc5 = res["locations"][-1][-1] + self.isl5[0]
             read.annot.strand += round(strand * res["pid"] * .5, 2)
             strand5 = strand
@@ -103,7 +103,7 @@ class Annotator(object):
             task="locations",
             pid=self.pid_isl
         )
-        if res["pid"] != -1:
+        if res["pid"] > 0:
             read.annot.ploc3 = res["locations"][0][0] + \
                 self.isl3[0] + len(read.seq)
             read.annot.strand += round(strand * res["pid"] * .5, 2)
