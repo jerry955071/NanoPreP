@@ -5,10 +5,16 @@
 * edlib (>=1.3.8) for Python
 
 ## Getting started
+**Option 1:** use git clone and run NanoPreP as a python module without installation
 ```
 git clone https://github.com/Woodformation1136/NanoPreP.git
 cd NanoPreP
-python NanoPreP --help
+python -m NanoPreP --help
+```
+**Option 2:** use pip install
+```
+pip install nanoprep-ffm
+nanoprep --help
 ```
 
 ## How NanoPreP works
