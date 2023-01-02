@@ -14,7 +14,7 @@ parser.add_argument(
 # general options
 parser.add_argument(
     "--mode",
-    metavar="[strandard|annotate|report]",
+    metavar="[standard|annotate|report]",
     type=str,
     help="use parameter presets "
     "(can be overriden by `config` and command line arguments) "
