@@ -10,6 +10,7 @@ from NanoPreP.paramtools.argParser import parser
 from datetime import datetime
 import sys
 import json
+import gzip
 
 def main():
     # parse arguments
@@ -79,6 +80,12 @@ def main():
         
 
     # open output files
+    def openg(p:Path, mode:str):
+        if p.suffix == ".gz":
+            return gzip.open(p, mode + "t")
+        else:
+            return open(p, mode)
+        
     handle_out = {}
     for name in ["output_fusion", "output_truncated", "output_full_length"]:
         cls = {
@@ -90,27 +97,23 @@ def main():
         if params[name] == "-":
             handle_out[(cls, "passed")] = sys.stdout
         elif params[name]:
-            # open new file (clear if already exist)
-            fout = Path(params[name])
-            open(fout, "w").close()
-            handle_out[(cls, "passed")] = open(fout, "a")
+            # open new file (truncate if already exist)
+            handle_out[(cls, "passed")] = openg(Path(params[name]), "w")
         else:
             handle_out[(cls, "passed")] = None
 
         # output filtered
         if params[name] and params["suffix_filtered"]:
-            # open new file (clear if already exist)
+            # open new file (truncate if already exist)
                 fout = Path(params[name])
                 fout = fout.stem + "_" + params["suffix_filtered"] + fout.suffix
-                open(fout, "w").close()
-                # record to `handle_out`
-                handle_out[(cls, "filtered")] = open(fout, "a")
+                handle_out[(cls, "filtered")] = openg(fout, "w")
         else:
             handle_out[(cls, "filtered")] = None
 
 
     # open `input_fq`
-    with open(params["input_fq"], "r") as handle_in:
+    with openg(Path(params["input_fq"]), "r") as handle_in:
         # stream processing
         for read in FastqIO.read(handle_in):
             # add read count
@@ -172,7 +175,7 @@ def main():
 
     # output report.json
     if params["report"]:
-        with open(params["report"], "w") as handle:
+        with openg(Path(params["report"]), "w") as handle:
             handle.write(json.dumps(report_dict, indent=4))
 
 if __name__ == "__main__":
