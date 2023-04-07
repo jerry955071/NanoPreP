@@ -8,7 +8,8 @@ class edlibAligner:
         target: str,
         mode: str,
         task: str,
-        pid: float
+        pid: float,
+        tie_breaking: str = "middle"
     ) -> dict:
         # call edlib for the alignment
         res = edlib.align(
@@ -19,12 +20,22 @@ class edlibAligner:
             round((1 - pid) * len(query))
         )
 
-        # add pid to result
+        # add 2 fields: `pid` and `location` to `res`
         if res["editDistance"] >= 0:
+            # pid
             res["pid"] = 1 - res["editDistance"] / len(query)
+            
+            # tie-breaking if edlib.align report more than one location
+            idx = {
+                "left": 0,
+                "middle": len(res["locations"]) // 2,
+                "right": -1
+            }
+            res["location"] = res.pop("locations")[idx[tie_breaking]] 
         else:
             res["pid"] = -1
-
+            res["location"] = (-1, -1)
+        
         return res
 
     def bestAlign(
@@ -32,12 +43,21 @@ class edlibAligner:
         target: str,
         mode: str,
         task: str,
-        pid: float
+        pid: float,
+        tie_breaking: str = "middle"
     ) -> Tuple[str, dict]:
         res = name = None
         # iterate over querys to find the best-aligned query
         for qname, query in querys.items():
-            new = edlibAligner.singleAlign(query, target, mode, task, pid)
+            new = edlibAligner.singleAlign(
+                query,
+                target,
+                mode,
+                task,
+                pid,
+                tie_breaking
+            )
+            
             # the first alingment result
             if not res:
                 res = new

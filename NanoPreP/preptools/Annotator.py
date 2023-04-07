@@ -88,10 +88,11 @@ class Annotator(object):
             read.seq[self.isl5[0]:self.isl5[1]],
             mode="HW",
             task="locations",
-            pid=self.pid_isl
+            pid=self.pid_isl,
+            tie_breaking="right"
         )
         if res["pid"] > 0:
-            read.annot.ploc5 = res["locations"][-1][-1] + self.isl5[0]
+            read.annot.ploc5 = res["location"][-1] + self.isl5[0]
             read.annot.strand += round(strand * res["pid"] * .5, 2)
             strand5 = strand
 
@@ -101,10 +102,11 @@ class Annotator(object):
             read.seq[self.isl3[0]:self.isl3[1]],
             mode="HW",
             task="locations",
-            pid=self.pid_isl
+            pid=self.pid_isl,
+            tie_breaking="left"
         )
         if res["pid"] > 0:
-            read.annot.ploc3 = res["locations"][0][0] + \
+            read.annot.ploc3 = res["location"][0] + \
                 self.isl3[0] + len(read.seq)
             read.annot.strand += round(strand * res["pid"] * .5, 2)
             strand3 = strand
