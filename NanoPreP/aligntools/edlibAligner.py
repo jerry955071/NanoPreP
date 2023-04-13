@@ -1,5 +1,5 @@
 """Caller of edlib.align()"""
-from typing import Tuple
+from typing import Tuple, List
 import edlib
 
 class edlibAligner:
@@ -12,12 +12,13 @@ class edlibAligner:
         tie_breaking: str = "middle"
     ) -> dict:
         # call edlib for the alignment
+        k = -1 if pid == -1 else round((1 - pid) * len(query))
         res = edlib.align(
             query,
             target,
             mode,
             task,
-            round((1 - pid) * len(query))
+            k
         )
 
         # add 2 fields: `pid` and `location` to `res`
@@ -70,3 +71,36 @@ class edlibAligner:
                 name = qname
 
         return name, res
+
+
+    def ntopAligns(
+            query: str,
+            target: str,
+            mode: str,
+            task: str,
+            pid: float,
+            n: int,
+            tie_breaking: str = "middle"
+        ) -> List[dict]:
+        out = []
+        lastloc = None
+        for _ in range(n):
+            # mask target sequence
+            if lastloc:
+                target = target[:lastloc[0]] + \
+                    "N" * (lastloc[1] - lastloc[0]) + \
+                    target[lastloc[1]:]
+            
+            # align
+            res =  edlibAligner.singleAlign(
+                    query,
+                    target,
+                    mode,
+                    task,
+                    pid,
+                    tie_breaking
+                )
+            lastloc = res["location"] if res["pid"] != -1 else None
+            out.append(res)            
+                
+        return out
