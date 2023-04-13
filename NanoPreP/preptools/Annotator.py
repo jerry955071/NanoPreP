@@ -1,6 +1,7 @@
 from NanoPreP.seqtools.SeqFastq import SeqFastq, SeqAnnot
 from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
 from NanoPreP.preptools.polyFinder import polyFinder
+from collections import namedtuple
 import re
 
 class Annotator(object):
@@ -132,3 +133,86 @@ class Annotator(object):
                     finder(read, n, max_n, k=self.k, w=self.w)
 
         return
+
+    
+class Tuner:
+    def __init__(
+            self,
+            p5_sense,
+            p5_anti,
+            p3_sense,
+            p3_anti
+        ) -> None:
+        self.p5_sense = p5_sense
+        self.p5_anti = p5_anti
+        self.p3_sense = p3_sense
+        self.p3_anti = p3_anti
+        return 
+    
+    def primer2read(self, read: SeqFastq, plen: int) -> dict:
+        SimpleResult = namedtuple("SimpleResult", "pid, location")
+        out = {}
+        out["p5_sense"] = \
+            [SimpleResult(i["pid"], i["location"][1]) for i in 
+            aligner.ntopAligns(
+                self.p5_sense[-plen:],
+                read.seq,
+                "HW",
+                "locations",
+                -1,
+                2
+            )
+        ]
+        out["p5_anti"] = \
+            [SimpleResult(i["pid"], i["location"][1]) for i in 
+            aligner.ntopAligns(
+                self.p5_anti[-plen:],
+                read.seq,
+                "HW",
+                "locations",
+                -1,
+                2
+            )
+        ]
+        out["p3_sense"] =  \
+            [SimpleResult(i["pid"], len(read.seq) - i["location"][0]) for i in 
+            aligner.ntopAligns(
+                self.p3_sense[:plen],
+                read.seq,
+                "HW",
+                "locations",
+                -1,
+                2
+            )
+        ]
+        out["p3_anti"] = \
+            [SimpleResult(i["pid"], len(read.seq) - i["location"][0]) for i in 
+            aligner.ntopAligns(
+                self.p3_anti[:plen],
+                read.seq,
+                "HW",
+                "locations",
+                -1,
+                2
+            )
+        ]
+        return out
+    
+    def primer2primer(self, plen: int) -> dict:
+        out = {}
+        out["p5"] = aligner.singleAlign(
+                self.p5_sense[-plen:],
+                self.p5_anti[-plen:],
+                "HW",
+                "locations",
+                -1
+            )["pid"]
+        out["p3"] = aligner.singleAlign(
+                self.p3_sense[:plen],
+                self.p3_anti[:plen],
+                "HW",
+                "locations",
+                -1
+            )["pid"]
+    
+        return out
