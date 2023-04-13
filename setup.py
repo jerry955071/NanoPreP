@@ -15,5 +15,10 @@ setup(
     url="https://github.com/Woodformation1136/NanoPreP",
     packages=find_packages(),
     install_requires=["edlib>=1.3.8", "numpy"],
-    entry_points={"console_scripts": ["nanoprep = NanoPreP.__main__:main"]}
+    entry_points={
+        "console_scripts": [
+            "nanoprep = NanoPreP.__main__:main",
+            "nanoprep-optimize = NanoPreP.optimize.__main__:main"
+        ]
+    }
 )
