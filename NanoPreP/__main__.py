@@ -1,6 +1,3 @@
-#!usr/bin/env Python
-from pathlib import Path
-import re
 from NanoPreP.preptools.Annotator import Annotator
 from NanoPreP.preptools.Processor import Processor
 from NanoPreP.seqtools.FastqIO import FastqIO
@@ -8,6 +5,7 @@ from NanoPreP.seqtools.SeqFastq import SeqFastq
 from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
 from datetime import datetime
+from pathlib import Path
 import sys
 import json
 import gzip
@@ -32,7 +30,6 @@ def main():
     if args.config:
         config = json.load(open(args.config))
         params.update(config)
-        pass
 
     # get command line arguments from ArgumentParser
     for k, v in vars(args).items():
