@@ -143,3 +143,6 @@ Dockerfile
 
 # tests
 test/
+
+# vscode
+.vscode/
