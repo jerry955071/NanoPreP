@@ -2,6 +2,7 @@ from NanoPreP.seqtools.SeqFastq import SeqFastq, SeqAnnot
 from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
 from NanoPreP.preptools.polyFinder import polyFinder
 from collections import namedtuple
+from typing import Tuple
 import re
 
 class Annotator(object):
@@ -60,7 +61,7 @@ class Annotator(object):
         return
 
     # annotate features on SeqFastq
-    def annotate(self, read: SeqFastq) -> None:
+    def annotate(self, read: SeqFastq, always: bool = False) -> None:
         # reset annot
         read.annot = SeqAnnot()
 
@@ -81,7 +82,8 @@ class Annotator(object):
             )
             if res["pid"] > 0:
                 read.annot.fusion = 1
-                return
+                if not always:
+                    return
 
         # align 5' primers to 5' isl
         strand, res = aligner.bestAlign(
@@ -131,25 +133,38 @@ class Annotator(object):
                         3: polyFinder.rfind
                     }[end]
                     finder(read, n, max_n, k=self.k, w=self.w)
-
         return
 
     
-class Tuner:
+class Optimizer:
     def __init__(
             self,
-            p5_sense,
-            p5_anti,
-            p3_sense,
-            p3_anti
+            p5_sense: str,
+            p3_sense: str,
+            p5_anti: str = None,
+            p3_anti: str = None,
+            isl5: tuple = None,
+            isl3: tuple = None
         ) -> None:
         self.p5_sense = p5_sense
-        self.p5_anti = p5_anti
         self.p3_sense = p3_sense
-        self.p3_anti = p3_anti
+        self.p5_anti = p5_anti if p5_anti else SeqFastq.reverse_complement_static(p3_sense)
+        self.p3_anti = p3_anti if p3_anti else SeqFastq.reverse_complement_static(p5_sense)
+        self.isl5 = isl5
+        self.isl3 = isl3
         return 
     
-    def primer2read(self, read: SeqFastq, plen: int) -> dict:
+    def alignPNbests(self, read: SeqFastq, plen: int, nbests: int) -> dict[str,namedtuple]:
+        """_summary_
+
+        Args:
+            read (SeqFastq): _description_
+            plen (int): _description_
+            nbests (int): _description_
+
+        Returns:
+            dict: {"primer_name": SimpleResult(pid, location)}
+        """
         SimpleResult = namedtuple("SimpleResult", "pid, location")
         out = {}
         out["p5_sense"] = \
@@ -160,7 +175,7 @@ class Tuner:
                 "HW",
                 "locations",
                 -1,
-                2
+                nbests
             )
         ]
         out["p5_anti"] = \
@@ -171,7 +186,7 @@ class Tuner:
                 "HW",
                 "locations",
                 -1,
-                2
+                nbests
             )
         ]
         out["p3_sense"] =  \
@@ -182,7 +197,7 @@ class Tuner:
                 "HW",
                 "locations",
                 -1,
-                2
+                nbests
             )
         ]
         out["p3_anti"] = \
@@ -193,12 +208,21 @@ class Tuner:
                 "HW",
                 "locations",
                 -1,
-                2
+                nbests
             )
         ]
         return out
     
-    def primer2primer(self, plen: int) -> dict:
+    
+    def alignP2P(self, plen: int) -> dict:
+        """Align primer to primers (5' to 5'; 3' to 3')
+
+        Args:
+            plen (int): the length of the primer substring to be aligned
+
+        Returns:
+            dict: {"p5": pid, "p3": pid}
+        """
         out = {}
         out["p5"] = aligner.singleAlign(
                 self.p5_sense[-plen:],
@@ -215,4 +239,56 @@ class Tuner:
                 -1
             )["pid"]
     
+        return out
+    
+    
+    def alignInB(self, read: SeqFastq) -> dict[str, Tuple[float, float]]:
+        """Align primer to ISL and read body
+
+        Args:
+            read (SeqFastq): _description_
+
+        Returns:
+            Dict[Tuple[float, float]]: 
+            {
+                "p5": (pid_isl, pid_body),
+                "p3": (pid_isl, pid_body)
+            }
+        """
+        
+        out = {}
+        # align 5' primers to 5' isl
+        strand, res = aligner.bestAlign(
+            {1: self.p5_sense, -1: self.p5_anti},
+            read.seq[self.isl5[0]:self.isl5[1]],
+            mode="HW",
+            task="locations",
+            pid=-1
+        )
+        pid_body = aligner.singleAlign(
+            {1: self.p5_sense, -1: self.p5_anti}[strand],
+            read.seq[self.isl5[1]:self.isl3[0]],
+            mode="HW",
+            task="locations",
+            pid=-1
+        )["pid"]
+        out["p5"] = (res["pid"], pid_body)
+
+        # align 3' primers to 3' isl
+        strand, res = aligner.bestAlign(
+            {1: self.p3_sense, -1: self.p3_anti},
+            read.seq[self.isl3[0]:self.isl3[1]],
+            mode="HW",
+            task="locations",
+            pid=-1,
+        )
+        pid_body = aligner.singleAlign(
+            {1: self.p3_sense, -1: self.p3_anti}[strand],
+            read.seq[self.isl5[1]:self.isl3[0]],
+            mode="HW",
+            task="locations",
+            pid=-1
+        )["pid"]
+        out["p3"] = (res["pid"], pid_body)
+        
         return out
