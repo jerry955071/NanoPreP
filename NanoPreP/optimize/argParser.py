@@ -15,7 +15,6 @@ parser.add_argument(
 parser.add_argument(
     "-n",
     metavar="int",
-    default=10000,
     type=int,
     help="sample `n` reads from `input_fq` (default: 10000)"
 )
@@ -31,7 +30,6 @@ parser.add_argument(
 parser.add_argument(
     "--output",
     metavar="PATH",
-    default="output.html",
     type=str,
     help="output html"
 )
@@ -47,14 +45,12 @@ parser.add_argument(
 parser.add_argument(
     "--skip_lowq",
     metavar="float",
-    default=-1,
     type=float,
     help="skip low-quality reads (default: -1)"
 )
 parser.add_argument(
     "--skip_short",
     metavar="int",
-    default=-1,
     type=int,
     help="skip too-short reads (default: -1)"
 )
@@ -62,14 +58,12 @@ parser.add_argument(
     "--p5_sense",
     metavar="str",
     type=str,
-    required=True,
     help="5' sense adatper/primer sequences"
 )
 parser.add_argument(
     "--p3_sense",
     metavar="str",
     type=str,
-    required=True,
     help="3' sense adatper/primer sequences"
 )
 parser.add_argument(
@@ -88,3 +82,17 @@ parser.add_argument(
     help="ideal searching location for 3' adapter/primer sequences "
     "(e.g. -60 -1)"
 )
+
+# Default parameters
+Defaults = {
+    "input_fq": None,
+    "n": 100000,
+    "config": None,
+    "output": "output.html",
+    "skip_lowq": 7,
+    "skip_short": 190,
+    "p5_sense": "GTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTTT",
+    "p3_sense": "CTTGCGGGCGGCGGACTCTCCTCTGAAGATAGAGCGACAG",
+    "isl5": [0, 130],
+    "isl3": [-60, -1]
+}

@@ -2,7 +2,7 @@ from NanoPreP.seqtools.SeqFastq import SeqFastq, SeqAnnot
 from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
 from NanoPreP.preptools.polyFinder import polyFinder
 from collections import namedtuple
-from typing import Tuple
+from typing import Tuple, Dict
 import re
 
 class Annotator(object):
@@ -154,7 +154,7 @@ class Optimizer:
         self.isl3 = isl3
         return 
     
-    def alignPNbests(self, read: SeqFastq, plen: int, nbests: int) -> dict[str,namedtuple]:
+    def alignPNbests(self, read: SeqFastq, plen: int, nbests: int) -> Dict[str, namedtuple]:
         """_summary_
 
         Args:
@@ -242,7 +242,7 @@ class Optimizer:
         return out
     
     
-    def alignInB(self, read: SeqFastq) -> dict[str, Tuple[float, float]]:
+    def alignInB(self, read: SeqFastq) -> Dict[str, Tuple[float, float]]:
         """Align primer to ISL and read body
 
         Args:
