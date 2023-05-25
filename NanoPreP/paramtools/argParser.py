@@ -3,15 +3,14 @@ from argparse import ArgumentParser
 # initiate ArgumentParser
 parser = ArgumentParser(description='Arguments availible to NanoPreP')
 
-# positional arguments
+# general options
 parser.add_argument(
-    "input_fq",
-    metavar="input.fq",
+    "--input_fq",
+    metavar="PATH",
+    required=True,
     type=str,
     help="input FASTQ"
 )
-
-# general options
 parser.add_argument(
     "--mode",
     metavar="[standard|annotate|report]",
@@ -31,6 +30,20 @@ parser.add_argument(
     metavar="PATH",
     type=str,
     help="output report file (JSON)"
+)
+
+# optimization options
+parser.add_argument(
+    "-n",
+    metavar="int",
+    type=int,
+    help="max number of reads to sample during optimzation (default: 100000)"
+)
+parser.add_argument(
+    "--precision",
+    metavar="float",
+    type=float,
+    help="adapter/primer precision cutoff"
 )
 
 # annotaion options
