@@ -146,13 +146,25 @@ class Optimizer:
             isl5: tuple = None,
             isl3: tuple = None
         ) -> None:
+        # parser of primer sequences
+        prog5 = re.compile("(?P<p>[A-Z]+)((?P<n>[A-Z])\{(?P<max_n>[0-9]*)\})*")
+        prog3 = re.compile("((?P<n>[A-Z])\{(?P<max_n>[0-9]*)\})*(?P<p>[A-Z]+)")
+        
+        # p5_sense -> p5_sense, n, max_n
+        p5_sense, n, max_n = \
+            prog5.match(p5_sense).group("p", "n", "max_n")
+        
+        # p3_sense -> p3_sense, n, max_n
+        p3_sense, n, max_n = \
+            prog3.match(p3_sense).group("p", "n", "max_n")
+
         self.p5_sense = p5_sense
         self.p3_sense = p3_sense
         self.p5_anti = p5_anti if p5_anti else SeqFastq.reverse_complement_static(p3_sense)
         self.p3_anti = p3_anti if p3_anti else SeqFastq.reverse_complement_static(p5_sense)
         self.isl5 = isl5
         self.isl3 = isl3
-        return 
+        return
     
     def alignPNbests(self, read: SeqFastq, plen: int, nbests: int) -> Dict[str, namedtuple]:
         """_summary_
