@@ -59,5 +59,7 @@ Defaults = {
     "output_truncated": None,
     "output_full_length": None,
     "suffix_filtered": None,
-    "input_fq": None
+    "input_fq": None,
+    "precision": None,
+    "n": 10000,
 }
