@@ -4,6 +4,7 @@ from NanoPreP.seqtools.FastqIO import FastqIO
 from NanoPreP.seqtools.SeqFastq import SeqFastq
 from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
+from NanoPreP.optimize.__main__ import get_pid_counts, get_pid_cutoff
 from datetime import datetime
 from pathlib import Path
 import sys
@@ -60,6 +61,28 @@ def main():
         "params": params
     }
 
+
+    # optimize pid_cutoff if `--precision` is specified   
+    if params["precision"]:
+        if not params["n"]:
+            params["n"] = 100000
+            
+        # get pid counts
+        SAMPLED, counters = get_pid_counts(
+            p5_sense=params["p5_sense"],
+            p3_sense=params["p3_sense"],
+            isl5=params["isl5"],
+            isl3=params["isl3"],
+            input_fq=params["input_fq"],
+            n=params["n"],
+            skip_short=params["skip_short"],
+            skip_lowq=params["skip_lowq"]
+        )
+        params["pid_isl"] = params["pid_body"]= get_pid_cutoff(
+            counters,
+            params["precision"]
+        )
+        
 
     # initiate an Annotator()
     if not params["disable_annot"]:
