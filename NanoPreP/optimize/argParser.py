@@ -3,15 +3,14 @@ from argparse import ArgumentParser
 # initiate ArgumentParser
 parser = ArgumentParser(description='Arguments availible to nanoprep-optimize')
 
-# positional arguments
+# general options
 parser.add_argument(
-    "input_fq",
+    "--input_fq",
     metavar="input.fq",
+    required=True,
     type=str,
     help="input FASTQ"
 )
-
-# general options
 parser.add_argument(
     "-n",
     metavar="int",
@@ -33,13 +32,6 @@ parser.add_argument(
     type=str,
     help="output html"
 )
-# parser.add_argument(
-#     "--output_config",
-#     metavar="PATH",
-#     default="config.json",
-#     type=str,
-#     help="output config.json (default: config.json)"
-# )
 
 # annotation options
 parser.add_argument(
@@ -89,10 +81,11 @@ Defaults = {
     "n": 100000,
     "config": None,
     "output": "output.html",
-    "skip_lowq": 7,
-    "skip_short": 190,
+    "skip_lowq": -1,
+    "skip_short": -1,
     "p5_sense": "GTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTTT",
     "p3_sense": "CTTGCGGGCGGCGGACTCTCCTCTGAAGATAGAGCGACAG",
     "isl5": [0, 130],
-    "isl3": [-60, -1]
+    "isl3": [-60, -1],
+    "precision": 0.99
 }
