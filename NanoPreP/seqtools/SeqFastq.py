@@ -166,15 +166,9 @@ class SeqFastq(object):
             new["ploc5"] = len(self.seq) - self.annot.ploc3
         else:
             new["ploc5"] = self.annot.ploc3
-        if self.annot.poly5 > 0:
-            new["poly3"] = self.annot.poly5
-        else:
-            new["poly3"] = self.annot.poly5
-        if self.annot.poly3 > 0:
-            new["poly5"] = self.annot.poly3
-        else:
-            new["poly5"] = self.annot.poly3
-
+        new["poly3"] = self.annot.poly5
+        new["poly5"] = self.annot.poly3
+        
         # update new annotation
         self.annot.ploc5 = new["ploc5"]
         self.annot.ploc3 = new["ploc3"]
