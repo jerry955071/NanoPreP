@@ -15,30 +15,31 @@ def main():
     # parse arguments
     args = parser.parse_args()
 
-    # collect parameters
+    # load default parameters as `params`
     params = Defaults.copy()
 
-    # get parameter presets
+    # update `params` with parameter presets
     if args.mode:
         if args.mode in Params.keys():
             params.update(Params[args.mode])
         else:
-            msg = "Available options to `mode`: "
+            msg = "Available options to `--mode`: "
             opts = ", ".join([i.__repr__() for i in Params.keys()])
             raise Exception(msg + opts)
 
-    # get parameter from config
+    # update `params` from config
     if args.config:
         config = json.load(open(args.config))
         params.update(config)
 
-    # get command line arguments from ArgumentParser
+    # update `params` with command line arguments (if specified)
     for k, v in vars(args).items():
-        if not v == Defaults[k]:
-            params[k] = v    
-        elif f"--{k}" in sys.argv:
+        # skip flag arguments if their value are False
+        if v == False:
+            continue
+        # skip un-specifed arguments
+        if v != None:
             params[k] = v
-        
 
     # initiate report dict
     report_dict = {
@@ -62,30 +63,26 @@ def main():
     }
 
 
-    # optimize pid_cutoff if `--precision` is specified   
-    if params["precision"]:
-        if not params["n"]:
-            params["n"] = 100000
-            
-        # get pid counts
-        SAMPLED, counters = get_pid_counts(
-            p5_sense=params["p5_sense"],
-            p3_sense=params["p3_sense"],
-            isl5=params["isl5"],
-            isl3=params["isl3"],
-            input_fq=params["input_fq"],
-            n=params["n"],
-            skip_short=params["skip_short"],
-            skip_lowq=params["skip_lowq"]
-        )
-        params["pid_isl"] = params["pid_body"]= get_pid_cutoff(
-            counters,
-            params["precision"]
-        )
-        
-
     # initiate an Annotator()
     if not params["disable_annot"]:
+        # optimize pid_cutoff if `--precision` is specified   
+        if params["precision"]:                
+            # get pid counts
+            SAMPLED, counters = get_pid_counts(
+                p5_sense=params["p5_sense"],
+                p3_sense=params["p3_sense"],
+                isl5=params["isl5"],
+                isl3=params["isl3"],
+                input_fq=params["input_fq"],
+                n=params["n"],
+                skip_short=params["skip_short"],
+                skip_lowq=params["skip_lowq"]
+            )
+            params["pid_isl"] = params["pid_body"]= get_pid_cutoff(
+                counters,
+                params["precision"]
+            )
+        
         ## initiate Annotator
         annotator = Annotator(
             p5_sense=params["p5_sense"],
