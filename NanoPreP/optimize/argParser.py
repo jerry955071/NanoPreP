@@ -1,25 +1,25 @@
-from argparse import ArgumentParser
+"""Argument parser for NanoPreP optimize"""
+from argparse import ArgumentParser, MetavarTypeHelpFormatter
 
 # initiate ArgumentParser
-parser = ArgumentParser(description='Arguments availible to nanoprep-optimize')
+parser = ArgumentParser(
+    formatter_class=MetavarTypeHelpFormatter
+)
 
 # general options
 parser.add_argument(
     "--input_fq",
-    metavar="input.fq",
     required=True,
     type=str,
     help="input FASTQ"
 )
 parser.add_argument(
     "-n",
-    metavar="int",
     type=int,
-    help="sample `n` reads from `input_fq` (default: 10000)"
+    help="max number of reads to sample during optimzation (default: 100000)"
 )
 parser.add_argument(
     "--config",
-    metavar="PATH",
     type=str,
     help="use the parameters in this config file (JSON) "
     "(can be overriden by command line arguments)"
@@ -28,7 +28,6 @@ parser.add_argument(
 # output options
 parser.add_argument(
     "--output",
-    metavar="PATH",
     type=str,
     help="output html"
 )
@@ -36,39 +35,33 @@ parser.add_argument(
 # annotation options
 parser.add_argument(
     "--skip_lowq",
-    metavar="float",
     type=float,
     help="skip low-quality reads (default: -1)"
 )
 parser.add_argument(
     "--skip_short",
-    metavar="int",
     type=int,
     help="skip too-short reads (default: -1)"
 )
 parser.add_argument(
     "--p5_sense",
-    metavar="str",
     type=str,
     help="5' sense adatper/primer sequences"
 )
 parser.add_argument(
     "--p3_sense",
-    metavar="str",
     type=str,
     help="3' sense adatper/primer sequences"
 )
 parser.add_argument(
     "--isl5",
-    metavar="int",
     nargs=2,
     type=int,
     help="ideal searching location for 5' adapter/primer sequences "
-    "(e.g. 1 130)"
+    "(e.g. 0 130)"
 )
 parser.add_argument(
     "--isl3",
-    metavar="int",
     nargs=2,
     type=int,
     help="ideal searching location for 3' adapter/primer sequences "
@@ -83,8 +76,8 @@ Defaults = {
     "output": "output.html",
     "skip_lowq": -1,
     "skip_short": -1,
-    "p5_sense": "GTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTTT",
-    "p3_sense": "CTTGCGGGCGGCGGACTCTCCTCTGAAGATAGAGCGACAG",
+    "p5_sense": "TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG",
+    "p3_sense": "GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC",
     "isl5": [0, 130],
     "isl3": [-60, -1],
     "precision": 0.99
