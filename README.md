@@ -2,7 +2,9 @@
 
 ## Requirements
 * Python (>= 3.7)  
-* edlib (>=1.3.8) for Python
+* edlib (>=1.3.8)
+* plotly
+
 
 ## Getting started
 **Option 1:** use git clone and run NanoPreP as a python module without installation
@@ -96,7 +98,7 @@ In addition to the `standard` mode, NanoPreP also provides other `mode` options 
 Each `mode` option applies multiple options at the same time, which can be detailed as follows:
 |mode|options|
 |:-|:-|
-|`standard`|```--discard_lowq 7 ```<br> ```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--filter_short 1``` <br>```--trim_adapter``` <br>```--trim_poly``` <br>```--orientation 1``` <br>```--output_full_length output.fq``` <br>```--report report.json```|
+|`standard`|```--skip_lowq 7 ```<br> ```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--filter_short 1``` <br>```--trim_adapter``` <br>```--trim_poly``` <br>```--orientation 1``` <br>```--output_full_length output.fq``` <br>```--report report.json```|
 |`annotate`|```--p5_sense TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG``` <br>```--p3_sense A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC``` <br>```--isl5 0 130``` <br>```--isl3 -60 -1``` <br>```--pid_isl 0.7``` <br>```--pid_body 0.7``` <br>```--poly_w 6``` <br>```--poly_k 4``` <br>```--orientation 0``` <br>```--output_fusion -``` <br>```--output_truncated -``` <br>```--output_full_length -``` <br>```--report report.json```|
 |`report`|```--disable_annot```<br>```--report report.json```|
 <br>
@@ -117,64 +119,43 @@ The command above means that there are poly`"A"` tails of maximum length `"50"` 
 
 ## Full usage
 ```
-usage: NanoPreP [-h] [--discard_lowq int] [--discard_short int]
-                [--disable_annot] [--p5_sense str] [--p3_sense str]
-                [--isl5 int int] [--isl3 int int] [--pid_isl float]
-                [--pid_body float] [--poly_w int] [--poly_k int]
-                [--orientation int] [--trim_adapter] [--trim_poly]
-                [--filter_short int] [--filter_lowq float]
-                [--mode [strandard|annotate|report]]
-                [--suffix_filtered str] [--report PATH] [--config PATH]
-                [--output_fusion PATH] [--output_truncated PATH]
-                [--output_full_length PATH]
-                input.fq
+usage: nanoprep [-h] [--version] --input_fq str [--mode [standard|annotate|report]]
+                [--config str] [--report str] [-n int] [--precision float]
+                [--disable_annot] [--skip_lowq float] [--skip_short int]
+                [--p5_sense str] [--p3_sense str] [--isl5 int int] [--isl3 int int]
+                [--pid_isl float] [--pid_body float] [--poly_w int] [--poly_k int]
+                [--trim_adapter] [--trim_poly] [--filter_lowq float]
+                [--filter_short int] [--orientation int] [--output_fusion str]
+                [--output_truncated str] [--output_full_length str]
+                [--suffix_filtered str]
 
-positional arguments:
-  input.fq              input FASTQ  
-
-general options:
-  -h, --help            show this help message and exit
-  --mode [strandard|annotate|report]
-                        use parameter presets (can be overriden by `config`
-                        and command line arguments)
-  --config PATH         use the parameters in this config file (JSON)(can be
-                        overriden by command line arguments)
-  --report PATH         output report file (JSON)
-
-annotation options:
-  --skip_lowq float     skip the annotation of low-quality reads (default: -1)
-  --skip_short int      skip the annotation of too-short reads (default: -1)
-  --disable_annot       use this flag to disable annotation
-  --p5_sense str        5' sense adatper/primer/polymer sequences
-  --p3_sense str        3' sense adatper/primer/polymer sequences
-  --isl5 int int        ideal searching location for 5' adapter/primer
-                        sequences (e.g. 1 130)
-  --isl3 int int        ideal searching location for 3' adapter/primer
-                        sequences (e.g. -60 -1)
-  --pid_isl float       adapter/primer percent identity cutoff (in ISL)
-  --pid_body float      adapter/primer percent identity cutoff (on read body)
-  --poly_w int          window size for homopolymer identification
-  --poly_k int          number of monomers to be expected in the window
-
-processing (trimming/filtering/orientation) options:
-  --trim_adapter        use this flag to trim adatper/primer sequences
-  --trim_poly           use this flag to trim homopolymers
-  --filter_lowq float   filter low-quality reads after all trimming steps
-                        (default: -1)
-  --filter_short int    filter too short reads after all trimming steps
-                        (default: -1)
-  --orientation int     re-orient reads (0: generic (default), 1: sense, -1:
-                        antisense)
-                        
-output options:
-  --output_fusion PATH  output fusion/chimeric reads to this file (use '-' for
-                        stdout)
-  --output_truncated PATH
-                        output truncated/non-full-length reads to this file
-                        (use '-' for stdout)
-  --output_full_length PATH
-                        output full-length reads to this file (use '-' for
-                        stdout)
-  --suffix_filtered str
-                        output filtered reads with the suffix 
+options:
+  -h, --help                show this help message and exit
+  --version                 show program's version number and exit
+  --input_fq str            input FASTQ
+  --mode str                use presets standard/annotate/report (can be overriden by `config` and command line arguments)
+  --config str              use the parameters in this config file (JSON)(can be overriden by command line arguments)
+  --report str              output report file (JSON)
+  -n int                    max number of reads to sample during optimzation (default: 100000)
+  --precision float         precision cutoff while optimizing pid cutoff
+  --disable_annot           use this flag to disable annotation
+  --skip_lowq float         skip low-quality reads (default: -1)
+  --skip_short int          skip too-short reads (default: -1)
+  --p5_sense str            5' sense adatper/primer/polymer sequences
+  --p3_sense str            3' sense adatper/primer/polymer sequences
+  --isl5 int int            ideal searching location for 5' adapter/primer sequences (e.g. 0 130)
+  --isl3 int int            ideal searching location for 3' adapter/primer sequences (e.g. -60 -1)
+  --pid_isl float           adapter/primer percent identity cutoff (in ISL)
+  --pid_body float          adapter/primer percent identity cutoff (on read body)
+  --poly_w int              window size for homopolymer identification
+  --poly_k int              number of monomers to be expected in the window
+  --trim_adapter            use this flag to trim adatper/primer sequences
+  --trim_poly               use this flag to trim homopolymers
+  --filter_lowq float       filter low-quality reads after all trimming steps (default: -1)
+  --filter_short int        filter too short reads after all trimming steps (default: -1)
+  --orientation int         re-orient reads (0: generic (default), 1: sense, -1: antisense)
+  --output_fusion str       output fusion/chimeric reads to this file (use '-' for stdout)
+  --output_truncated str    output truncated/non-full-length reads to this file (use '-' for stdout)
+  --output_full_length str  output full-length reads to this file (use '-' for stdout)
+  --suffix_filtered str     output filtered reads with the suffix
 ```
