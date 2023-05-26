@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from NanoPreP._version import __version__
 
 # read README.md
 with open("README.md", "r") as fh:
@@ -6,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="nanoprep-ffm",
-    version="0.0.12",
+    version=__version__,
     author="Chia-Chen Chu",
     author_email="jerry955071@gmail.com",
     description="A fully-equipped, fast, and memory-efficient pre-processor for ONT transcriptomic data",
