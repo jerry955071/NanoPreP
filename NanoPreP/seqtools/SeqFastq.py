@@ -22,8 +22,8 @@ class SeqAnnot(object):
         self.fusion = fusion  # 1: fusion, 0: non-fusion
         self.ploc5 = ploc5  # 0: trimmed, -1: not found, int > 0: primer location on `seq`
         self.ploc3 = ploc3  # 0: trimmed, -1: not found, int > 0: primer location on `seq`
-        self.poly5 = poly5  # 0: trimmed, -1: not found, int > 0: polymer length
-        self.poly3 = poly3  # 0: trimmed, -1: not found, int > 0: polymer length
+        self.poly5 = poly5  # 0: not found, int > 0: polymer length, int < 0: trimmed polymer length
+        self.poly3 = poly3  # 0: not found, int > 0: polymer length, int < 0: trimmed polymer length
         pass
 
     def __str__(self) -> str:

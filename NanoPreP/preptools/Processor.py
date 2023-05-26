@@ -11,7 +11,8 @@ class Processor:
         # get 5' cutpoint
         if read.annot.poly5 > 0 and trim_poly:
             a = read.annot.ploc5 + read.annot.poly5
-            read.annot.poly5 = read.annot.ploc5 = 0 # 0: trimmed
+            read.annot.ploc5 = 0 # 0: trimmed
+            read.annot.poly5 *= -1 # int < 0: trimmed
         elif read.annot.ploc5 > 0 and trim_adapt:
             a = read.annot.ploc5
             read.annot.ploc5 = 0  # 0: trimmed
@@ -21,7 +22,8 @@ class Processor:
         # get 3' cutpoint
         if read.annot.poly3 > 0 and trim_poly:
             b = read.annot.ploc3 - read.annot.poly3
-            read.annot.poly3 = read.annot.ploc3 = 0  # 0: trimmed
+            read.annot.ploc3 = 0  # 0: trimmed
+            read.annot.poly3 *= -1  # int < 0: trimmed
         elif read.annot.ploc3 > 0 and trim_adapt:
             b = read.annot.ploc3
             read.annot.ploc3 = 0  # 0: trimmed
