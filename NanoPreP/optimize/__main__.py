@@ -51,6 +51,9 @@ def get_pid_counts(
         # Sample at most `n` reads
         SAMPLED = 0
         for read in FastqIO.read(handle_in):
+            if SAMPLED > n:
+                break
+            
             # skip too-short reads if `skip_short`
             if skip_short > len(read):
                 continue
@@ -58,20 +61,16 @@ def get_pid_counts(
             # skip low-quality reads if `skip_lowq` 
             if skip_lowq > SeqFastq.meanq(read):
                 continue
-            
-            
-            SAMPLED += 1
-            if SAMPLED > n:
-                SAMPLED -= 1
-                break
-            
+                        
             # primer alignment
             for _, (pid_isl, pid_rb) in optimizer.alignInB(read).items():
                 counters["ISL"][round(pid_isl, 2)] += 1
                 counters["Read body"][round(pid_rb, 2)] += 1
+                
+            SAMPLED += 1
         
 
-    # add zero counts
+    # make sure counters share the same key list
     pids = set(list(counters["ISL"].keys())) | set(list(counters["Read body"].keys()))
     pids = list(pids)
     for pid in pids:
@@ -89,7 +88,7 @@ def plot_pid_counts(SAMPLED, counters, palatte, output, params, html_template):
         subplot_titles=[f"Sampled {SAMPLED:,} reads"]
     )
         
-    # Add trace `"Read body"` data to subplot (1, 1)
+    # Add trace `Read body`
     fig.add_trace(
         go.Bar(
             x=[f"{i:.2f}" for i in counters["Read body"].keys()],
@@ -102,7 +101,7 @@ def plot_pid_counts(SAMPLED, counters, palatte, output, params, html_template):
         row=1, col=1
     )
         
-    # Add trace `ISL` data
+    # Add trace `ISL`
     fig.add_trace(
         go.Bar(
             visible=True,
@@ -117,9 +116,9 @@ def plot_pid_counts(SAMPLED, counters, palatte, output, params, html_template):
     )
         
 
-    # legendrank = 3
-    pids = set(list(counters["ISL"].keys())) | set(list(counters["Read body"].keys()))
-    pids = list(pids)
+    # Add trace `Precision` (opacity=0) and hovertext
+    # make hovertexts
+    pids = list(counters["ISL"].keys())
     hvtexts = []
     for pid in pids:
         tp = sum([v if k >= pid else 0 for k, v in counters["ISL"].items()])
@@ -130,7 +129,7 @@ def plot_pid_counts(SAMPLED, counters, palatte, output, params, html_template):
             f"False positives: {fp}<br>" +
             f"Precision: {precision}"
         )
-            
+    # add trace
     fig.add_trace(
         go.Bar(
             visible=True,
@@ -177,14 +176,17 @@ def plot_pid_counts(SAMPLED, counters, palatte, output, params, html_template):
     )
     
     
-    # makedir
+    # makedir for output
     os.makedirs(Path(output).parent, exist_ok=True)
+    
+    # write to file
     with open(output, "w") as handle_html:
         out = html_template
         out = out.replace("%(args)", " ".join(sys.argv[1:]))
         out = out.replace("%(plot)", fig.to_html())
         out = out.replace("%(params)", json.dumps(params))
         handle_html.write(out)
+        
     return
 
 
@@ -193,8 +195,7 @@ def get_pid_cutoff(counters, precision_cutoff):
     pid_cutoff = None
     
     # iter over pids
-    pids = set(list(counters["ISL"].keys())) | set(list(counters["Read body"].keys()))
-    pids = list(pids)
+    pids = list(counters["ISL"].keys())
     pids.sort(reverse=True)
     for pid in pids:
         tp = sum([v if k >= pid else 0 for k, v in counters["ISL"].items()])
@@ -209,7 +210,7 @@ def get_pid_cutoff(counters, precision_cutoff):
 
 
 def main():    
-    # get parameters
+    # load default parameters
     params = Defaults.copy()
     
     # parse arguments
@@ -220,9 +221,9 @@ def main():
         config = json.load(open(args.config))
         params.update(config)
         
-    # update command line arguments from ArgumentParser
+    # update parameter with command line arguments
     for k, v in vars(args).items():
-        if v:
+        if v != None:
             params[k] = v
             
     
