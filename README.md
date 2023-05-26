@@ -58,7 +58,7 @@ nanoprep \
 <!-- TODO: why annotate reads? re-usable, time-saving, transparency, flexibility -->
 After running this command, two output files `output.fq` and `report.json` will appear in your working directory.  The `report.json` records start/stop times, the parameters used, and the detail information of the input FASTQ file. The `output.fq` contains full-length reads processed by NanoPreP. For each processed read, NanoPreP appends the annotations to the ID line (the line started with @): 
 ```
-@read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=-1 poly3=0
+@read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=0 poly3=-20
 AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
 +
 +,),+'$)'%671*%('&$%......((&'(*($%$&%&$-((84*
@@ -71,10 +71,10 @@ As shown in the example above, several flags are used for the annotation:
 |`fusion`|[0\|1]|0|0: non-chimeric/-fusion; 1: chimeric/fusion|
 |`ploc5`|-?\d+|-1|-1: unknown; 0: removed; > 0: 5' adapter/primer location|
 |`ploc3`|-?\d+|-1|-1: unknown; 0: removed; > 0: 3' adapter/primer location|
-|`poly5`|-?\d+|-1|-1: unknown; 0: removed; > 0: 5' polymer length|
-|`poly3`|-?\d+|-1|-1: unknown; 0: removed; > 0: 3' polymer length|
+|`poly5`|-?\d+|-1|0: unknown; > 0: 5' polymer length; < 0: trimmed 5' polymer length|
+|`poly3`|-?\d+|-1|0: unknown; > 0: 3' polymer length; < 0: trimmed 3' polymer length|
 
-According to the annotation, the example "read1" is a sense strand (`strand=0.91`), full-length (`full_length=1`), non-chimeric (`fusion=0`),  adapter/primer removed (`ploc5=0 ploc3=0`), and polyA removed (`poly3=0`) read.
+According to the annotation, the example "read1" is a sense strand (`strand=0.91`), full-length (`full_length=1`), non-chimeric (`fusion=0`),  adapter/primer removed (`ploc5=0 ploc3=0`), and polyA removed (`poly3=-20`) read.
 
 ## Modes <a id="Modes"></a>
 In addition to the `standard` mode, NanoPreP also provides other `mode` options for different usages:  
