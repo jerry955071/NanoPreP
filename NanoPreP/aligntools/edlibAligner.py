@@ -1,6 +1,7 @@
 """Caller of edlib.align()"""
 from typing import Tuple, List
 import edlib
+import random
 
 class edlibAligner:
     def singleAlign(
@@ -24,7 +25,7 @@ class edlibAligner:
         # add 2 fields: `pid` and `location` to `res`
         if res["editDistance"] >= 0:
             # pid
-            res["pid"] = 1 - res["editDistance"] / len(query)
+            res["pid"] = round(1 - res["editDistance"] / len(query), 2)
             
             # tie-breaking if edlib.align report more than one location
             idx = {
@@ -85,10 +86,10 @@ class edlibAligner:
         out = []
         lastloc = None
         for _ in range(n):
-            # mask target sequence
+            # replace the last alignment with random bases)
             if lastloc:
                 target = target[:lastloc[0]] + \
-                    "N" * (lastloc[1] - lastloc[0]) + \
+                    "".join(random.choice("ACGT") for _ in range(lastloc[1] - lastloc[0])) + \
                     target[lastloc[1]:]
             
             # align
