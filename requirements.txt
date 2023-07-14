@@ -1,3 +1,4 @@
 edlib==1.3.8
 numpy
 plotly
+pandas
