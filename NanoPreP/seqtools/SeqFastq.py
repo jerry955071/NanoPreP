@@ -13,8 +13,8 @@ class SeqAnnot(object):
         fusion: int = 0,
         ploc5: int = -1,
         ploc3: int = -1,
-        poly5: int = -1,
-        poly3: int = -1
+        poly5: int = 0,
+        poly3: int = 0
     ) -> None:
         self.strand = strand  # 0: unknown, > 0: sense, < 0: antisense
         self.orientation = orientation  # 1: generic, -1: filpped
