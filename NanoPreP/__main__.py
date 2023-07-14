@@ -1,27 +1,247 @@
 from NanoPreP.preptools.Annotator import Annotator
 from NanoPreP.preptools.Processor import Processor
-from NanoPreP.seqtools.FastqIO import FastqIO
+from NanoPreP.seqtools.FastqIO import FastqIO, FastqIndexIO
 from NanoPreP.seqtools.SeqFastq import SeqFastq
 from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
-from NanoPreP.optimize.__main__ import get_pid_counts, get_pid_cutoff
+from NanoPreP.preptools.Optimizer import Optimizer
 from datetime import datetime
 from pathlib import Path
-import sys
-import json
-import gzip
+import multiprocessing as mp
+import os, sys, json, gzip, random, logging
 
+# TODO:
+# 1. test for the number of reads to sample for optimization
+
+# initiate global variable `PARAMS`
+PARAMS = {}
+
+# set logging style
+logging.basicConfig(
+    format="[%(asctime)s] PID=%(process)d: %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.DEBUG
+)
+
+
+# main function
 def main():
+    # get parameters
+    num_reads = get_params()
+    
+    # create output queue and process pool
+    manager = mp.Manager()
+    output_queue = manager.Queue()
+    pool = mp.Pool(processes=PARAMS["processes"] + 1) # +1 for `fq_writer`
+    
+    # initiate `REPORT_DICT`
+    REPORT_DICT = {}
+    REPORT_DICT["start time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+    REPORT_DICT["total reads"] = 0
+    REPORT_DICT["skipped"] = 0
+    REPORT_DICT["fusion/passed"] = 0
+    REPORT_DICT["fusion/filtered"] = 0
+    REPORT_DICT["truncated/passed"] = 0
+    REPORT_DICT["truncated/filtered"] = 0
+    REPORT_DICT["full-length/passed"] = 0
+    REPORT_DICT["full-length/filtered"] = 0
+    REPORT_DICT["stop time"] = None
+    
+    # put fq_writer/report_logger to work
+    watcher_out = pool.apply_async(fq_writer, (output_queue,))
+
+    # create batch tasks
+    tasks = []
+    batches = max(num_reads // PARAMS["batch_size"] + 1, PARAMS["processes"])
+    batch_size = num_reads // batches + 1
+    for batch_id in range(batches):
+        tasks.append((
+            PARAMS["input_fq"],
+            output_queue,
+            batch_id,
+            batch_size
+        ))
+
+    # collect results from the workers through the pool result queue
+    read_counts = pool.starmap_async(batch_worker, tasks)
+    for read_count in read_counts.get():
+        for k, v in read_count.items():
+            REPORT_DICT[k] += v
+
+    # close the pool and wait for the workers to finish
+    output_queue.put('kill')
+    pool.close()
+    pool.join()
+    
+    # get stop time
+    REPORT_DICT["stop time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+
+    # write report.json
+    if PARAMS["report"]:
+        with openg(Path(PARAMS["report"]), "w") as handle:
+            REPORT_DICT["params"] = PARAMS
+            handle.write(json.dumps(REPORT_DICT, indent=4))
+            
+    return
+
+
+# worker function
+def batch_worker(input_file, output_queue, batch_id, batch_size):
+    # logging
+    logging.info("Start batch %d" % batch_id)
+    
+    # initiate `read_counter`
+    read_counter = {
+        "total reads": 0,
+        "skipped": 0,
+        "fusion/passed": 0,
+        "fusion/filtered": 0,
+        "truncated/passed": 0,
+        "truncated/filtered": 0,
+        "full-length/passed": 0,
+        "full-length/filtered": 0
+    }
+    
+    # initiate Annotator
+    annotator = Annotator(
+        p5_sense=PARAMS["p5_sense"],
+        p3_sense=PARAMS["p3_sense"],
+        isl5=PARAMS["isl5"],
+        isl3=PARAMS["isl3"],
+        pid_left=PARAMS["pid5"],
+        pid_right=PARAMS["pid3"],
+        pid_body=PARAMS["pid_body"],
+        w=PARAMS["poly_w"],
+        k=PARAMS["poly_k"]
+    )
+    
+    # get reads (stored in memory)
+    logging.info(f"Batch {batch_id}: Loading reads")
+    reads = FastqIO.batch_read(
+        input_file,
+        batch_id * batch_size,
+        batch_size
+    )
+    logging.info(f"Batch {batch_id}: Loaded {len(reads):,d} reads")
+    
+    # iterate through reads
+    for read in reads:
+        # update read counter
+        read_counter["total reads"] += 1
+        
+        # read = indexed_fq.get(rname)
+        # skip too-short reads if `skip_short`
+        if PARAMS["skip_short"] > len(read):
+            read_counter["skipped"] += 1
+            continue
+
+        # skip low-quality reads if `skip_lowq` 
+        if PARAMS["skip_lowq"] > SeqFastq.meanq(read):
+            read_counter["skipped"] += 1
+            continue
+
+        PASS = "passed"
+        # annotate reads
+        if not PARAMS["disable_annot"]:
+            annotator.annotate(read)
+
+        # try trimming
+        if PARAMS["trim_poly"]:
+            Processor.trimmer(read, True, True)
+        elif PARAMS["trim_adapter"]:
+            Processor.trimmer(read, False, True)
+
+        # orient read
+        if PARAMS["orientation"] != 0:
+            Processor.orientor(read, to=PARAMS["orientation"])
+
+        # check length
+        if PARAMS["filter_short"] > len(read):
+            PASS = "filtered"
+
+        # check quality
+        if PARAMS["filter_lowq"] > SeqFastq.meanq(read):
+            PASS = "filtered"
+        
+        # classify reads into one of: fusion/full-length/truncated
+        CLASS = None
+        if read.annot.fusion:
+            CLASS = "fusion"
+        elif read.annot.full_length:
+            CLASS = "full-length"
+        else:
+            CLASS = "truncated"
+        
+        # put read into queue
+        output_queue.put([read, (CLASS, PASS)])
+        
+        # update read counter
+        read_counter[f"{CLASS}/{PASS}"] += 1
+    
+    logging.info(f"Finished batch {batch_id}")
+    return read_counter
+
+
+# listener function
+def fq_writer(queue):
+    # initiate handle_dict
+    handle_dict = {}
+    
+    # create/open output files
+    for name in ["output_fusion", "output_truncated", "output_full_length"]:
+        cls = {
+            "output_fusion": "fusion",
+            "output_truncated": "truncated",
+            "output_full_length": "full-length"
+        }[name]
+        # output passed
+        if PARAMS[name] == "-":
+            handle_dict[(cls, "passed")] = sys.stdout
+        elif PARAMS[name]:
+            os.makedirs(Path(PARAMS[name]).parent, exist_ok=True)
+            handle_dict[(cls, "passed")] = openg(Path(PARAMS[name]), "w")
+        else:
+            handle_dict[(cls, "passed")] = None
+
+        # output filtered
+        if PARAMS[name] and PARAMS["suffix_filtered"]:
+            # open new file (truncate if already exist)
+            fout = Path(PARAMS[name])
+            fout = fout.stem + "_" + PARAMS["suffix_filtered"] + fout.suffix
+            handle_dict[(cls, "filtered")] = openg(fout, "w")
+        else:
+            handle_dict[(cls, "filtered")] = None
+    
+    # write reads to output files
+    while True:
+        m = queue.get()
+        if m == "kill":
+            break
+        read, (cls, pass_) = m
+        if handle_dict[(cls, pass_)]:
+            FastqIO.write(handle_dict[(cls, pass_)], read)
+            
+    # close handles
+    for handle in handle_dict.values():
+        handle.close()
+        
+    return
+
+
+# get parameters from command line arguments
+def get_params():
+    global PARAMS
+    
     # parse arguments
     args = parser.parse_args()
 
     # load default parameters as `params`
-    params = Defaults.copy()
+    PARAMS = Defaults.copy()
 
     # update `params` with parameter presets
     if args.mode:
         if args.mode in Params.keys():
-            params.update(Params[args.mode])
+            PARAMS.update(Params[args.mode])
         else:
             msg = "Available options to `--mode`: "
             opts = ", ".join([i.__repr__() for i in Params.keys()])
@@ -30,7 +250,7 @@ def main():
     # update `params` from config
     if args.config:
         config = json.load(open(args.config))
-        params.update(config)
+        PARAMS.update(config)
 
     # update `params` with command line arguments (if specified)
     for k, v in vars(args).items():
@@ -39,161 +259,80 @@ def main():
             continue
         # skip un-specifed arguments
         if v != None:
-            params[k] = v
-
-    # initiate report dict
-    report_dict = {
-        "start time": datetime.now().strftime("%Y/%m/%d-%H:%M:%S"),
-        "total reads": 0,
-        "skipped": 0,
-        "fusion": {
-            "passed": 0,
-            "filtered": 0
-        },
-        "truncated": {
-            "passed": 0,
-            "filtered": 0
-        },
-        "full-length": {
-            "passed": 0,
-            "filtered": 0
-        },
-        "stop time": None,
-        "params": params
-    }
-
-
-    # initiate an Annotator()
-    if not params["disable_annot"]:
-        # optimize pid_cutoff if `--precision` is specified   
-        if params["precision"]:                
-            # get pid counts
-            SAMPLED, counters = get_pid_counts(
-                p5_sense=params["p5_sense"],
-                p3_sense=params["p3_sense"],
-                isl5=params["isl5"],
-                isl3=params["isl3"],
-                input_fq=params["input_fq"],
-                n=params["n"],
-                skip_short=params["skip_short"],
-                skip_lowq=params["skip_lowq"]
+            PARAMS[k] = v
+    
+    
+    # optimize pid_cutoff if not `--disable_annot` and `--beta`
+    if not PARAMS["disable_annot"]:
+        # optimize pid_cutoff if `--beta` is specified   
+        if PARAMS["beta"]:
+            # initialize optimizer
+            optimizer = Optimizer(
+                p5_sense=PARAMS["p5_sense"],
+                p3_sense=PARAMS["p3_sense"]
             )
-            params["pid_isl"] = params["pid_body"]= get_pid_cutoff(
-                counters,
-                params["precision"]
+            
+            # sample `n` reads
+            logging.info("Counting records in FASTQ file")
+            sampled_fq, num_reads = FastqIO.sample(
+                PARAMS["input_fq"],
+                PARAMS["n"], 
+                PARAMS["seed"]
             )
+            logging.info(f"Found {num_reads:,d} records in FASTQ file")
+            logging.info(f"Sampled {len(sampled_fq):,d} records for optimization")
         
-        ## initiate Annotator
-        annotator = Annotator(
-            p5_sense=params["p5_sense"],
-            p3_sense=params["p3_sense"],
-            isl5=params["isl5"],
-            isl3=params["isl3"],
-            pid_isl=params["pid_isl"],
-            pid_body=params["pid_body"],
-            w=params["poly_w"],
-            k=params["poly_k"]
-        )
-        
-
-    # open output files
-    def openg(p:Path, mode:str):
-        if p.suffix == ".gz":
-            return gzip.open(p, mode + "t")
-        else:
-            return open(p, mode)
-        
-    handle_out = {}
-    for name in ["output_fusion", "output_truncated", "output_full_length"]:
-        cls = {
-            "output_fusion": "fusion",
-            "output_truncated": "truncated",
-            "output_full_length": "full-length"
-        }[name]
-        # output passed
-        if params[name] == "-":
-            handle_out[(cls, "passed")] = sys.stdout
-        elif params[name]:
-            # open new file (truncate if already exist)
-            handle_out[(cls, "passed")] = openg(Path(params[name]), "w")
-        else:
-            handle_out[(cls, "passed")] = None
-
-        # output filtered
-        if params[name] and params["suffix_filtered"]:
-            # open new file (truncate if already exist)
-                fout = Path(params[name])
-                fout = fout.stem + "_" + params["suffix_filtered"] + fout.suffix
-                handle_out[(cls, "filtered")] = openg(fout, "w")
-        else:
-            handle_out[(cls, "filtered")] = None
-
-
-    # open `input_fq`
-    with openg(Path(params["input_fq"]), "r") as handle_in:
-        # stream processing
-        for read in FastqIO.read(handle_in):
-            # add read count
-            report_dict["total reads"] += 1
-
-            # skip too-short reads if `skip_short`
-            if params["skip_short"] > len(read):
-                report_dict["skipped"] += 1
-                continue
-
-            # skip low-quality reads if `skip_lowq` 
-            if params["skip_lowq"] > SeqFastq.meanq(read):
-                report_dict["skipped"] += 1
-                continue
-
-            PASS = "passed"
-            # annotate reads
-            if not params["disable_annot"]:
-                annotator.annotate(read)
-
-            # try trimming
-            if params["trim_poly"]:
-                Processor.trimmer(read, True, True)
-            elif params["trim_adapter"]:
-                Processor.trimmer(read, False, True)
-
-            # orient read
-            if params["orientation"] != 0:
-                Processor.orientor(read, to=params["orientation"])
-
-            # check length
-            if params["filter_short"] > len(read):
-                PASS = "filtered"
-
-            # check quality
-            if params["filter_lowq"] > SeqFastq.meanq(read):
-                PASS = "filtered"
+            # optimize parameters            
+            out = optimizer.optimize(
+                fq_iter=sampled_fq,
+                plens=[.5, .6, .7, .8, .9, 1.0],
+                n_iqr=[.5, 1, 1.5, 2],
+                processes=PARAMS["processes"],
+                target="fscore",
+                beta=PARAMS["beta"]
+            )
             
-            # classify reads into one of: fusion/full-length/truncated
-            CLASS = None
-            if read.annot.fusion:
-                CLASS = "fusion"
-            elif read.annot.full_length:
-                CLASS = "full-length"
-            else:
-                CLASS = "truncated"
+            # update `PARAMS`
+            PARAMS["p5_sense"] = out["left"]["seq"]
+            PARAMS["p3_sense"] = out["right"]["seq"]
+            PARAMS["pid5"] = out["left"]["pid"]
+            PARAMS["pid3"] = out["right"]["pid"]
+            PARAMS["pid_body"] = max(
+                out["left"]["pid"],
+                out["right"]["pid"]
+            )
+            PARAMS["isl5"] = (0, int(out["left"]["loc"]))
+            PARAMS["isl3"] = (-int(out["right"]["loc"]), -1)
             
-            # write to file if output specified
-            if handle_out[(CLASS, PASS)]:
-                FastqIO.write(handle_out[(CLASS, PASS)], read)
+            res = (
+                f"Optimization results:\n"
+                f"5' primer:\n"
+                f"  - sequence={PARAMS['p5_sense']}\n"
+                f"  - percent identity cutoff={PARAMS['pid5']}\n"
+                f"  - ideal searching location=({PARAMS['isl5'][0]}, {PARAMS['isl5'][1]})\n"
+                f"  - fscore={out['right']['fscore']:.2f}\n"
+                f"  - precision={out['left']['prec']:.2f}\n"
+                f"  - recall={out['left']['recall']:.2f}\n"
+                f"3' primer:\n"
+                f"  - sequence={PARAMS['p3_sense']}\n"
+                f"  - percent identity cutoff={PARAMS['pid3']}\n"
+                f"  - ideal searching location=({PARAMS['isl3'][0]}, {PARAMS['isl3'][1]})\n"
+                f"  - fscore={out['right']['fscore']:.3f}\n"
+                f"  - precision={out['right']['prec']:.3f}\n"
+                f"  - recall={out['right']['recall']:.3f}"
+            )
+            logging.info(res)
+            
+    return num_reads
 
-            # update report_dict
-            report_dict[CLASS][PASS] += 1
 
-
-    # get the stopping time 
-    report_dict["stop time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
-
-
-    # output report.json
-    if params["report"]:
-        with openg(Path(params["report"]), "w") as handle:
-            handle.write(json.dumps(report_dict, indent=4))
-
+# extended open function
+def openg(p:Path, mode:str):
+    if p.suffix == ".gz":
+        return gzip.open(p, mode + "t")
+    else:
+        return open(p, mode)
+    
 if __name__ == "__main__":
-    main()
+   main()
+   logging.info("Finished all batches.")
