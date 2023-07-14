@@ -15,7 +15,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Woodformation1136/NanoPreP",
     packages=find_packages(),
-    install_requires=["edlib>=1.3.8", "numpy", "plotly"],
+    install_requires=["edlib>=1.3.8", "numpy", "plotly", "pandas"],
     entry_points={
         "console_scripts": [
             "nanoprep = NanoPreP.__main__:main",
