@@ -38,6 +38,23 @@ parser.add_argument(
     type=str,
     help="output report file (JSON)"
 )
+parser.add_argument(
+    "--processes",
+    type=int,
+    help="number of processes to use (default: 6)"
+)
+parser.add_argument(
+    "--batch_size",
+    type=int,
+    help="number of records in each batch (default: 1000000)"
+)
+parser.add_argument(
+    "--seed",
+    type=int,
+    help="seed for random number generator (default: 42)"
+)
+
+
 
 # optimization options
 parser.add_argument(
@@ -46,9 +63,9 @@ parser.add_argument(
     help="max number of reads to sample during optimzation (default: 100000)"
 )
 parser.add_argument(
-    "--precision",
+    "--beta",
     type=float,
-    help="precision cutoff while optimizing pid cutoff"
+    help="use f-beta score to optimize pid_cutoff"
 )
 
 # annotaion options
@@ -94,9 +111,14 @@ parser.add_argument(
     "(e.g. -60 -1)"
 )
 parser.add_argument(
-    "--pid_isl",
+    "--pid5",
     type=float,
-    help="adapter/primer percent identity cutoff (in ISL)"
+    help="5' adapter/primer percent identity cutoff (in ISL)"
+)
+parser.add_argument(
+    "--pid3",
+    type=float,
+    help="3' adapter/primer percent identity cutoff (in ISL)"
 )
 parser.add_argument(
     "--pid_body",
