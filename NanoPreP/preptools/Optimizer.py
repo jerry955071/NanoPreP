@@ -4,7 +4,6 @@ from typing import Tuple, Dict, List
 from multiprocessing import Pool
 import numpy as np
 import pandas as pd
-import sys
 import re
 
 class Optimizer:
