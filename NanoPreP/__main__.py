@@ -108,8 +108,8 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
         p3_sense=PARAMS["p3_sense"],
         isl5=PARAMS["isl5"],
         isl3=PARAMS["isl3"],
-        pid_left=PARAMS["pid5"],
-        pid_right=PARAMS["pid3"],
+        pid5=PARAMS["pid5"],
+        pid3=PARAMS["pid3"],
         pid_body=PARAMS["pid_body"],
         w=PARAMS["poly_w"],
         k=PARAMS["poly_k"]
