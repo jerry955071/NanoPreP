@@ -24,21 +24,24 @@ class edlibAligner:
         )
 
         # add 2 fields: `pid` and `location` to `res`
-        res_pid =  round(1 - res["editDistance"] / len(query), 2)
-        if res_pid >= pid:
-            # pid
-            res["pid"] = res_pid
-            
-            # tie-breaking if edlib.align report more than one location
-            idx = {
-                "left": 0,
-                "middle": len(res["locations"]) // 2,
-                "right": -1
-            }
-            res["location"] = res.pop("locations")[idx[tie_breaking]] 
-        else:
+        if res["editDistance"] < 0:
             res["pid"] = -1
             res["location"] = (-1, -1)
+        else:
+            if round(1 - res["editDistance"] / len(query), 2) >= pid:
+                # pid
+                res["pid"] = round(1 - res["editDistance"] / len(query), 2)
+                
+                # tie-breaking if edlib.align report more than one location
+                idx = {
+                    "left": 0,
+                    "middle": len(res["locations"]) // 2,
+                    "right": -1
+                }
+                res["location"] = res.pop("locations")[idx[tie_breaking]]
+            else:
+                res["pid"] = -1
+                res["location"] = (-1, -1)
         
         return res
 
