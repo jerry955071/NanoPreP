@@ -2,6 +2,7 @@
 from typing import Tuple, List
 import edlib
 import random
+import math
 
 class edlibAligner:
     def singleAlign(
@@ -13,7 +14,7 @@ class edlibAligner:
         tie_breaking: str = "middle"
     ) -> dict:
         # call edlib for the alignment
-        k = -1 if pid == -1 else round((1 - pid) * len(query))
+        k = -1 if pid == -1 else math.ceil((1 - pid) * len(query))
         res = edlib.align(
             query,
             target,
@@ -23,9 +24,10 @@ class edlibAligner:
         )
 
         # add 2 fields: `pid` and `location` to `res`
-        if res["editDistance"] >= 0:
+        res_pid =  round(1 - res["editDistance"] / len(query), 2)
+        if res_pid >= pid:
             # pid
-            res["pid"] = round(1 - res["editDistance"] / len(query), 2)
+            res["pid"] = res_pid
             
             # tie-breaking if edlib.align report more than one location
             idx = {
