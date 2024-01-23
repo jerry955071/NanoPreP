@@ -134,7 +134,11 @@ class Optimizer:
         
         # get loc targets
         med_loc = np.median(data[data["cls"] == "positive"]["loc"])
-        iqr_loc = np.quantile(data[data["cls"] == "positive"]["loc"], .75) - np.quantile(data[data["cls"] == "positive"]["loc"], .25)
+        iqr_loc = np.quantile(
+            data[data["cls"] == "positive"]["loc"], .75, method="median_unbiased"
+            ) - np.quantile(
+            data[data["cls"] == "positive"]["loc"], .25, method="median_unbiased"
+        )
         isls = [med_loc + n * iqr_loc for n in n_iqr]
         
         # iter over pid and loc targets
