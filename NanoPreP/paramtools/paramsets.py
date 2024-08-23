@@ -1,8 +1,8 @@
 Params = {
     "standard": {
         "skip_lowq": 7,
-        "p5_sense": "TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG",
-        "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC",
+        "p5_sense": "ATCGCCTACCGTGACAAGAAAGTTGTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGC",
+        "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAACTTTCTTGTCACGGTAGGCGAT",
         "poly_w": 6,
         "poly_k": 4,
         "filter_short": 1,
@@ -11,16 +11,11 @@ Params = {
         "orientation": 1,
         "report": "report.json",
         "processes": 16,
-        "beta": .5
+        "beta": .1
     },
     "annotate": {
-        "p5_sense": "TCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGCTGGG",
-        "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAAC",
-        "isl5": [0, 130],
-        "isl3": [-60, -1],
-        "pid5": 0.7,
-        "pid3": 0.7,
-        "pid_body": 0.7,
+        "p5_sense": "ATCGCCTACCGTGACAAGAAAGTTGTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGC",
+        "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAACTTTCTTGTCACGGTAGGCGAT",
         "poly_w": 6,
         "poly_k": 4,
         "orientation": 0,
@@ -29,7 +24,7 @@ Params = {
         "output_truncated": "-",
         "report": "report.json",
         "processes": 16,
-        "beta": .5
+        "beta": .1
     },
     "report": {
         "disable_annot": True,
