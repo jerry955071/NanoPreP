@@ -2,7 +2,7 @@ from NanoPreP.preptools.Annotator import Annotator
 from NanoPreP.preptools.Processor import Processor
 from NanoPreP.seqtools.FastqIO import FastqIO, FastqIndexIO
 from NanoPreP.seqtools.SeqFastq import SeqFastq
-from NanoPreP.paramtools.paramsets import Params, Defaults
+# from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
 from NanoPreP.preptools.Optimizer import Optimizer
 from datetime import datetime
@@ -10,8 +10,7 @@ from pathlib import Path
 import multiprocessing as mp
 import os, sys, json, gzip, random, logging
 
-# TODO:
-# 1. test for the number of reads to sample for optimization
+# TODO: 1. test for the number of reads to sample for optimization
 
 # initiate global variable `PARAMS`
 PARAMS = {}
@@ -146,9 +145,9 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
             annotator.annotate(read)
 
         # try trimming
-        if PARAMS["trim_poly"]:
+        if not PARAMS["keep_poly"]:
             Processor.trimmer(read, True, True)
-        elif PARAMS["trim_adapter"]:
+        elif not PARAMS["keep_adapter"]:
             Processor.trimmer(read, False, True)
 
         # orient read
@@ -234,94 +233,73 @@ def get_params():
     
     # parse arguments
     args = parser.parse_args()
+    PARAMS = vars(args)
 
-    # load default parameters as `params`
-    PARAMS = Defaults.copy()
-
-    # update `params` with parameter presets
-    if args.mode:
-        if args.mode in Params.keys():
-            PARAMS.update(Params[args.mode])
-        else:
-            msg = "Available options to `--mode`: "
-            opts = ", ".join([i.__repr__() for i in Params.keys()])
-            raise Exception(msg + opts)
-
-    # update `params` from config
+    
+    # update `params` from config (mostly for rerun)
     if args.config:
         config = json.load(open(args.config))
         PARAMS.update(config)
 
-    # update `params` with command line arguments (if specified)
-    for k, v in vars(args).items():
-        # skip flag arguments if their value are False
-        if v == False:
-            continue
-        # skip un-specifed arguments
-        if v != None:
-            PARAMS[k] = v
-    
-    
-    # optimize pid_cutoff if not `--disable_annot` and `--beta`
-    if not PARAMS["disable_annot"]:
-        # optimize pid_cutoff if `--beta` is specified   
-        if PARAMS["beta"]:
-            # initialize optimizer
-            optimizer = Optimizer(
-                p5_sense=PARAMS["p5_sense"],
-                p3_sense=PARAMS["p3_sense"]
-            )
-            
-            # sample `n` reads
-            logging.info("Counting records in FASTQ file")
-            sampled_fq, num_reads = FastqIO.sample(
-                PARAMS["input_fq"],
-                PARAMS["n"], 
-                PARAMS["seed"]
-            )
-            logging.info(f"Found {num_reads:,d} records in FASTQ file")
-            logging.info(f"Sampled {len(sampled_fq):,d} records for optimization")
+
+    # optimize AP identification parameters if `--beta` is specified   
+    if PARAMS["beta"]:
+        # initialize optimizer
+        optimizer = Optimizer(
+            p5_sense=PARAMS["p5_sense"],
+            p3_sense=PARAMS["p3_sense"]
+        )
         
-            # optimize parameters            
-            out = optimizer.optimize(
-                fq_iter=sampled_fq,
-                plens=[.5, .6, .7, .8, .9, 1.0],
-                n_iqr=[.5, 1, 1.5, 2],
-                processes=PARAMS["processes"],
-                target="fscore",
-                beta=PARAMS["beta"]
-            )
-            
-            # update `PARAMS`
-            PARAMS["p5_sense"] = out["left"]["seq"]
-            PARAMS["p3_sense"] = out["right"]["seq"]
-            PARAMS["pid5"] = out["left"]["pid"]
-            PARAMS["pid3"] = out["right"]["pid"]
-            PARAMS["pid_body"] = max(
-                out["left"]["pid"],
-                out["right"]["pid"]
-            )
-            PARAMS["isl5"] = (0, int(out["left"]["loc"]))
-            PARAMS["isl3"] = (-int(out["right"]["loc"]), -1)
-            
-            res = (
-                f"Optimization results:\n"
-                f"5' primer:\n"
-                f"  - sequence={PARAMS['p5_sense']}\n"
-                f"  - percent identity cutoff={PARAMS['pid5']}\n"
-                f"  - ideal searching location=({PARAMS['isl5'][0]}, {PARAMS['isl5'][1]})\n"
-                f"  - fscore={out['right']['fscore']:.2f}\n"
-                f"  - precision={out['left']['prec']:.2f}\n"
-                f"  - recall={out['left']['recall']:.2f}\n"
-                f"3' primer:\n"
-                f"  - sequence={PARAMS['p3_sense']}\n"
-                f"  - percent identity cutoff={PARAMS['pid3']}\n"
-                f"  - ideal searching location=({PARAMS['isl3'][0]}, {PARAMS['isl3'][1]})\n"
-                f"  - fscore={out['right']['fscore']:.3f}\n"
-                f"  - precision={out['right']['prec']:.3f}\n"
-                f"  - recall={out['right']['recall']:.3f}"
-            )
-            logging.info(res)
+        # sample `n` reads
+        logging.info("Counting records in FASTQ file")
+        sampled_fq, num_reads = FastqIO.sample(
+            PARAMS["input_fq"],
+            PARAMS["n"], 
+            PARAMS["seed"]
+        )
+        logging.info(f"Found {num_reads:,d} records in FASTQ file")
+        logging.info(f"Sampled {len(sampled_fq):,d} records for optimization")
+    
+        # optimize parameters            
+        out = optimizer.optimize(
+            fq_iter=sampled_fq,
+            plens=[.5, .6, .7, .8, .9, 1.0],
+            n_iqr=[.5, 1, 1.5, 2],
+            processes=PARAMS["processes"],
+            target="fscore",
+            beta=PARAMS["beta"]
+        )
+        
+        # update `PARAMS`
+        PARAMS["p5_sense"] = out["left"]["seq"]
+        PARAMS["p3_sense"] = out["right"]["seq"]
+        PARAMS["pid5"] = out["left"]["pid"]
+        PARAMS["pid3"] = out["right"]["pid"]
+        PARAMS["pid_body"] = max(
+            out["left"]["pid"],
+            out["right"]["pid"]
+        )
+        PARAMS["isl5"] = (0, int(out["left"]["loc"]))
+        PARAMS["isl3"] = (-int(out["right"]["loc"]), -1)
+        
+        res = (
+            f"Optimization results:\n"
+            f"5' primer:\n"
+            f"  - sequence={PARAMS['p5_sense']}\n"
+            f"  - percent identity cutoff={PARAMS['pid5']}\n"
+            f"  - ideal searching location=({PARAMS['isl5'][0]}, {PARAMS['isl5'][1]})\n"
+            f"  - fscore={out['right']['fscore']:.2f}\n"
+            f"  - precision={out['left']['prec']:.2f}\n"
+            f"  - recall={out['left']['recall']:.2f}\n"
+            f"3' primer:\n"
+            f"  - sequence={PARAMS['p3_sense']}\n"
+            f"  - percent identity cutoff={PARAMS['pid3']}\n"
+            f"  - ideal searching location=({PARAMS['isl3'][0]}, {PARAMS['isl3'][1]})\n"
+            f"  - fscore={out['right']['fscore']:.3f}\n"
+            f"  - precision={out['right']['prec']:.3f}\n"
+            f"  - recall={out['right']['recall']:.3f}"
+        )
+        logging.info(res)
             
     return num_reads
 

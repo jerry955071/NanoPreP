@@ -22,12 +22,6 @@ parser.add_argument(
     help="input FASTQ"
 )
 parser.add_argument(
-    "--mode",
-    type=str,
-    help="use presets standard/annotate/report "
-    "(can be overriden by `config` and command line arguments) "
-)
-parser.add_argument(
     "--config",
     type=str,
     help="use the parameters in this config file (JSON)"
@@ -36,22 +30,26 @@ parser.add_argument(
 parser.add_argument(
     "--report",
     type=str,
-    help="output report file (JSON)"
+    help="output report file (JSON)",
+    default="report.json"
 )
 parser.add_argument(
     "--processes",
     type=int,
-    help="number of processes to use (default: 6)"
+    help="number of processes to use (default: 16)",
+    default=16
 )
 parser.add_argument(
     "--batch_size",
     type=int,
-    help="number of records in each batch (default: 1000000)"
+    help="number of records in each batch (default: 1000000)",
+    default=1000000
 )
 parser.add_argument(
     "--seed",
     type=int,
-    help="seed for random number generator (default: 42)"
+    help="seed for random number generator (default: 42)",
+    default=42
 )
 
 
@@ -60,12 +58,14 @@ parser.add_argument(
 parser.add_argument(
     "-n",
     type=int,
-    help="max number of reads to sample during optimzation (default: 100000)"
+    help="max number of reads to sample during optimzation (default: 100000)",
+    default=100000
 )
 parser.add_argument(
     "--beta",
     type=float,
-    help="use f-beta score to optimize pid_cutoff"
+    help="the beta parameter for the optimization (default: .1)",
+    default=.1
 )
 
 # annotaion options
@@ -76,92 +76,92 @@ parser.add_argument(
 )
 parser.add_argument(
     "--skip_lowq",
-    default=-1,
+    default=7,
     type=float,
-    help="skip low-quality reads (default: -1)"
+    help="skip low-quality reads (default: 7)",
 )
 parser.add_argument(
     "--skip_short",
-    default=-1,
+    default=0,
     type=int,
-    help="skip too-short reads (default: -1)"
+    help="skip too-short reads (default: 0)"
 )
 parser.add_argument(
     "--p5_sense",
     type=str,
-    help="5' sense adatper/primer/polymer sequences"
+    help="5' sense adatper/primer + polyA sequences"
 )
 parser.add_argument(
     "--p3_sense",
     type=str,
-    help="3' sense adatper/primer/polymer sequences"
+    help="3' sense adatper/primer + polyA sequences"
 )
 parser.add_argument(
     "--isl5",
     nargs=2,
     type=int,
-    help="ideal searching location for 5' adapter/primer sequences "
-    "(e.g. 0 130)"
+    help="ideal searching location for 5' adapter/primer sequences (default: optimized)"
 )
 parser.add_argument(
     "--isl3",
     nargs=2,
     type=int,
-    help="ideal searching location for 3' adapter/primer sequences "
-    "(e.g. -60 -1)"
+    help="ideal searching location for 3' adapter/primer sequences (default: optimized)"
 )
 parser.add_argument(
     "--pid5",
     type=float,
-    help="5' adapter/primer percent identity cutoff (in ISL)"
+    help="5' adapter/primer percent identity cutoff (default: optimized)"
 )
 parser.add_argument(
     "--pid3",
     type=float,
-    help="3' adapter/primer percent identity cutoff (in ISL)"
+    help="3' adapter/primer percent identity cutoff (default: optimized)"
 )
 parser.add_argument(
     "--pid_body",
     type=float,
-    help="adapter/primer percent identity cutoff (on read body)"
+    help="adapter/primer percent identity cutoff (default: optimized)"
 )
 parser.add_argument(
     "--poly_w",
     type=int,
-    help="window size for homopolymer identification"
+    help="window size for polyA/T identification",
+    default=6
 )
 parser.add_argument(
     "--poly_k",
     type=int,
-    help="number of monomers to be expected in the window"
+    help="number of A/T to be expected in the window",
+    default=4
 )
 
 # processing (filtering/trimming/orientation) options
 parser.add_argument(
-    "--trim_adapter",
+    "--keep_adapter",
     action="store_true",
-    help="use this flag to trim adatper/primer sequences"
+    help="use this flag to keep adatper/primer sequences"
 )
 parser.add_argument(
-    "--trim_poly",
+    "--keep_poly",
     action="store_true",
-    help="use this flag to trim homopolymers"
+    help="use this flag to keep polyA/T sequences"
 )
 parser.add_argument(
     "--filter_lowq",
-    default=-1,
+    default=7,
     type=float,
-    help="filter low-quality reads after all trimming steps (default: -1)"
+    help="filter low-quality reads after all trimming steps (default: 7)"
 )
 parser.add_argument(
     "--filter_short",
-    default=-1,
+    default=0,
     type=int,
-    help="filter too short reads after all trimming steps (default: -1)"
+    help="filter too short reads after all trimming steps (default: 0)"
 )
 parser.add_argument(
     "--orientation",
-    default=0,
+    default=1,
     type=int,
     help="re-orient reads (0: generic (default), 1: sense, -1: antisense)"
 )
@@ -180,7 +180,8 @@ parser.add_argument(
 parser.add_argument(
     "--output_full_length",
     type=str,
-    help="output full-length reads to this file (use '-' for stdout)"
+    help="output full-length reads to this file (use '-' for stdout)",
+    default="-"
 )
 parser.add_argument(
     "--suffix_filtered",
