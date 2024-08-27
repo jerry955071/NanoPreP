@@ -114,8 +114,8 @@ options:
   --pid_body float      adapter/primer percent identity cutoff (default: optimized)
   --poly_w int          window size for polyA/T identification
   --poly_k int          number of A/T to be expected in the window
-  --keep_adapter        use this flag to keep adatper/primer sequences
-  --keep_poly           use this flag to keep polyA/T sequences
+  --trim_adapter        use this flag to trim adatper/primer sequences
+  --trim_poly           use this flag to trim polyA/T sequences
   --filter_lowq float   filter low-quality reads after all trimming steps (default: 7)
   --filter_short int    filter too short reads after all trimming steps (default: 0)
   --orientation int     re-orient reads (0: generic , 1: sense (default), -1: antisense)
