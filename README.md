@@ -28,23 +28,29 @@ The $\beta$ value in the formula of $F_{\beta}$ score greatly affect NanoPreP's 
 The general usage of NanoPreP to get ***high-quality, non-chimeric, full-length, strand-reoriented, adapter/primer-removed, polyA-removed*** reads:
 ```
 nanoprep \
+  --input_fq input.fq
   --beta 0.1 \
   --p5_sense 5_PRIMER_SEQUENCE \
   --p3_sense A{100}3_PRIMER_SEQUENCE \
+  --trim_adapter \
+  --trim_poly \
   --output_full_length output.fq \
-  --report report.json \
-  input.fq
+  --report report.json
 ```
+- `--input_fq input.fq` ← file contains raw sequences
+- `--beta 0.1` ← optimize adapter/primer identification parameters using $F_{0.1}$ score
 - `--p5_sense 5_PRIMER_SEQUENCE` ← 5' primer sequence in sense strand direction
-- `--p3_sense A{100}3_PRIMER_SEQUENCE` ← polyA + 3' primer sequence in sense strand direction (see section [How to specify adapter/primer and polyA/T sequences](#HOWTO))
+- `--p3_sense A{100}3_PRIMER_SEQUENCE` ← expected length of polyA + 3' primer sequence in sense strand direction (see section [How to specify adapter/primer and polyA/T sequences](#HOWTO))
 - `--output_full_length output.fq` ← write full-length reads to `output.fq`  
 - `--report report.json` ← write details of the run to `report.json`  
-- `input.fq` ← raw sequences
+
 
 
 <!-- TODO: why annotate reads? re-usable, time-saving, transparency, flexibility -->
-After running this command, two output files `output.fq` and `report.json` will be written to your working directory.  
-The `report.json` records start/stop times, the parameters used, and the detail information of the input FASTQ file. 
+After running this command, two output files `output.fq` and `report.json` will be written to your working directory.
+
+The `report.json` records start/stop times, the parameters used, and the detail information of the input FASTQ file.  
+
 The `output.fq` contains full-length reads processed by NanoPreP. For each processed read, NanoPreP appends the information of the read to the ID line (the line started with @): 
 ```
 @read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=0 poly3=-20

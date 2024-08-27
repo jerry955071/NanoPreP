@@ -145,9 +145,9 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
             annotator.annotate(read)
 
         # try trimming
-        if not PARAMS["keep_poly"]:
+        if PARAMS["trim_poly"]:
             Processor.trimmer(read, True, True)
-        elif not PARAMS["keep_adapter"]:
+        elif PARAMS["trim_adapter"]:
             Processor.trimmer(read, False, True)
 
         # orient read

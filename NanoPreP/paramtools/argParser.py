@@ -138,14 +138,14 @@ parser.add_argument(
 
 # processing (filtering/trimming/orientation) options
 parser.add_argument(
-    "--keep_adapter",
+    "--trim_adapter",
     action="store_true",
-    help="use this flag to keep adatper/primer sequences"
+    help="use this flag to trim adatper/primer sequences"
 )
 parser.add_argument(
-    "--keep_poly",
+    "--trim_poly",
     action="store_true",
-    help="use this flag to keep polyA/T sequences"
+    help="use this flag to trim polyA/T sequences"
 )
 parser.add_argument(
     "--filter_lowq",
