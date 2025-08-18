@@ -6,11 +6,9 @@
 
 
 ## Getting started
-**Option 1:** use git clone and run NanoPreP as a python module without installation
+**Option 1:** run with Docker
 ```
-git clone https://github.com/Woodformation1136/NanoPreP.git
-cd NanoPreP
-python -m NanoPreP --help
+docker run chiaenu/nanoprep:latest nanoprep --help
 ```
 **Option 2:** use pip install
 ```
