@@ -45,10 +45,15 @@ class Optimizer:
             target: str,
             beta: float
         ) -> Dict[str, object]:
+        res_l, data_l = self.optimizeLIP(fq_iter, plens, "left", n_iqr, processes, target, beta)
+        res_r, data_r = self.optimizeLIP(fq_iter, plens, "right", n_iqr, processes, target, beta)
         out = {
-            "left": self.optimizeLIP(fq_iter, plens, "left", n_iqr, processes, target, beta),
-            "right": self.optimizeLIP(fq_iter, plens, "right", n_iqr, processes, target, beta)
+            "left": res_l,
+            "right": res_r
         }
+        data_l["site"] = "left"
+        data_r["site"] = "right"
+        data_all = pd.concat([data_l, data_r], ignore_index=True)
         if self.poly_n5:
             out["left"]["seq"] = \
                 self.p5_sense[-int(round(len(self.p5_sense) * out["left"]["plen"])):] \
@@ -67,7 +72,7 @@ class Optimizer:
             out["right"]["seq"] = \
                 self.p3_sense[:int(round(len(self.p3_sense) * out["right"]["plen"]))]
             
-        return out
+        return out, data_all
     
     def optimizeLIP(
             self,
@@ -88,6 +93,7 @@ class Optimizer:
             Dict[str, object]:  optimzed parameters
         """
         out = {target: -1}
+        data_all = pd.DataFrame()
         # iter over primer lengths (ascending)
         plens.sort()
         task = []
@@ -97,11 +103,13 @@ class Optimizer:
         with Pool(processes) as pool:
             results = pool.starmap(self.optimizePI, task)
         
-        for res in results:
+        for res, data in results:
+            data["plen"] = res["plen"]
+            data_all = pd.concat([data_all, data], ignore_index=True)
             if res[target] > out[target]:
                 out = res
         
-        return out
+        return out, data_all
     
     
     def optimizePI(
@@ -109,7 +117,7 @@ class Optimizer:
             fq_iter: iter,
             plen: float, 
             site: str,
-            n_iqr: List[int],
+            n_iqr: int,
             target: str,
             beta: float
         ) -> Dict[str, object]:
@@ -133,13 +141,8 @@ class Optimizer:
         pids = pids[::-1]
         
         # get loc targets
-        med_loc = np.median(data[data["cls"] == "positive"]["loc"])
-        iqr_loc = np.quantile(
-            data[data["cls"] == "positive"]["loc"], .75, method="median_unbiased"
-            ) - np.quantile(
-            data[data["cls"] == "positive"]["loc"], .25, method="median_unbiased"
-        )
-        isls = [med_loc + n * iqr_loc for n in n_iqr]
+        tmp_loc = data[data["cls"] == "positive"]["loc"]
+        isls = np.linspace(tmp_loc.median(), tmp_loc.quantile(.9), n_iqr).flatten()
         
         # iter over pid and loc targets
         for pid in pids:
@@ -148,7 +151,7 @@ class Optimizer:
                 if res[target] > out[target]:
                     out = res
         out["plen"] = plen
-        return out
+        return out, data
     
     
     @staticmethod

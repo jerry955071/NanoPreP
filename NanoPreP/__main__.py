@@ -5,6 +5,7 @@ from NanoPreP.seqtools.SeqFastq import SeqFastq
 # from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
 from NanoPreP.preptools.Optimizer import Optimizer
+from NanoPreP.html_report import HTML_report
 from datetime import datetime
 from pathlib import Path
 import multiprocessing as mp
@@ -261,24 +262,23 @@ def get_params():
         logging.info(f"Sampled {len(sampled_fq):,d} records for optimization")
     
         # optimize parameters            
-        out = optimizer.optimize(
+        out, data = optimizer.optimize(
             fq_iter=sampled_fq,
             plens=[.5, .6, .7, .8, .9, 1.0],
-            n_iqr=[.5, 1, 1.5, 2],
+            n_iqr=10,
             processes=PARAMS["processes"],
             target="fscore",
             beta=PARAMS["beta"]
         )
-        
         # update `PARAMS`
         PARAMS["p5_sense"] = out["left"]["seq"]
         PARAMS["p3_sense"] = out["right"]["seq"]
         PARAMS["pid5"] = out["left"]["pid"]
         PARAMS["pid3"] = out["right"]["pid"]
-        PARAMS["pid_body"] = max(
-            out["left"]["pid"],
-            out["right"]["pid"]
-        )
+        if PARAMS["pid_body"] == None:
+            PARAMS["pid_body"] = max(PARAMS["pid5"], PARAMS["pid3"])
+        else:
+            PARAMS["pid_body"] = max(PARAMS["pid_body"], max(PARAMS["pid5"], PARAMS["pid3"])) 
         PARAMS["isl5"] = (0, int(out["left"]["loc"]))
         PARAMS["isl3"] = (-int(out["right"]["loc"]), -1)
         
