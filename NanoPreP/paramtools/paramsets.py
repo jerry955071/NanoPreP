@@ -1,6 +1,5 @@
 Params = {
     "standard": {
-        "skip_lowq": 7,
         "p5_sense": "ATCGCCTACCGTGACAAGAAAGTTGTCGGTGTCTTTGTGTTTCTGTTGGTGCTGATATTGC",
         "p3_sense": "A{100}GAAGATAGAGCGACAGGCAAGTCACAAAGACACCGACAACTTTCTTGTCACGGTAGGCGAT",
         "poly_w": 6,
@@ -42,8 +41,6 @@ Defaults = {
     "n": 100000,
     "beta": .1,
     "disable_annot": False,
-    "skip_lowq": 7,
-    "skip_short": 0,
     "p5_sense": None,
     "p3_sense": None,
     "isl5": None,

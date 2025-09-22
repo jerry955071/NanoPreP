@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NanoPrePro Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #06185B;
+      margin: 30px;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #197D95;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #4DBF92;
+      margin-top: 30px;
+      margin-bottom: 5px;
+    }
+    p.description {
+      font-size: 14px;
+      color: #444;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    .code-block {
+      font-family: monospace;
+      font-size: 14px;
+      background: #f0f4f8;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 8px 0 20px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .plot-container {
+      text-align: center;
+      margin: 10px 0 20px 0;
+    }
+    .plot-container .caption {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>NanoPrePro Report</h1>
+
+  <!-- Stats section (only mean Q-score plot) -->
+  <h2>Summary</h2>
+  <div class="plot-container">
+    %(meanq)
+  </div>
+
+  <!-- AP-alignment section -->
+  <h2>Parameter Optimization</h2>
+  <p>Adapter/primer (AP) sequences of different lengths are aligned to each read two times.</p>
+  <ul>
+    <li><span class="true">The <span class="highlight">first alignment</span></span> is treated as the real one (blue).</li>
+    <li><span class="random">The <span class="highlight">second alignment</span></span> is treated as a random one (orange).</li>
+  </ul>
+  <p><strong>NanoPrePro</strong> then finds the best combination of <strong>AP length, similarity cutoff, and location cutoffs</strong> to tell real alignments apart from random ones.</p>
+  <div class="plot-container">
+    %(plot)
+  </div>
+  <!-- Parameters section -->
+  <!-- <h2>Optimized Parameters</h2> -->
+  <p>The final set of optimized parameters:</p>
+  <div class="code-block">%(params)</div>
+
+
+  <!-- Command line section -->
+  <h2>Command Line</h2>
+  <p class="description">
+    The command used to generate this report and perform optimization.
+  </p>
+  <div class="code-block">nanoprep %(args)</div>
+
+</body>
+</html>

@@ -5,8 +5,10 @@ from NanoPreP.seqtools.SeqFastq import SeqFastq
 # from NanoPreP.paramtools.paramsets import Params, Defaults
 from NanoPreP.paramtools.argParser import parser
 from NanoPreP.preptools.Optimizer import Optimizer
+from NanoPreP.HTML_report import HTML_report
 from datetime import datetime
 from pathlib import Path
+import numpy as np
 import multiprocessing as mp
 import os, sys, json, gzip, random, logging
 
@@ -26,7 +28,7 @@ logging.basicConfig(
 # main function
 def main():
     # get parameters
-    num_reads = get_params()
+    num_reads, data, res = get_params()
     
     # create output queue and process pool
     manager = mp.Manager()
@@ -36,6 +38,7 @@ def main():
     # initiate `REPORT_DICT`
     REPORT_DICT = {}
     REPORT_DICT["start time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+    REPORT_DICT["stop time"] = None
     REPORT_DICT["total reads"] = 0
     REPORT_DICT["skipped"] = 0
     REPORT_DICT["fusion/passed"] = 0
@@ -44,7 +47,7 @@ def main():
     REPORT_DICT["truncated/filtered"] = 0
     REPORT_DICT["full-length/passed"] = 0
     REPORT_DICT["full-length/filtered"] = 0
-    REPORT_DICT["stop time"] = None
+    
     
     # put fq_writer/report_logger to work
     watcher_out = pool.apply_async(fq_writer, (output_queue,))
@@ -62,10 +65,12 @@ def main():
         ))
 
     # collect results from the workers through the pool result queue
-    read_counts = pool.starmap_async(batch_worker, tasks)
-    for read_count in read_counts.get():
+    MEANQ_LIST = []
+    read_counts_meanq_list = pool.starmap_async(batch_worker, tasks)
+    for read_count, meanq_list in read_counts_meanq_list.get():
         for k, v in read_count.items():
             REPORT_DICT[k] += v
+        MEANQ_LIST += meanq_list
 
     # close the pool and wait for the workers to finish
     output_queue.put('kill')
@@ -75,12 +80,16 @@ def main():
     # get stop time
     REPORT_DICT["stop time"] = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
-    # write report.json
+    # write report.html
     if PARAMS["report"]:
-        with openg(Path(PARAMS["report"]), "w") as handle:
-            REPORT_DICT["params"] = PARAMS
-            handle.write(json.dumps(REPORT_DICT, indent=4))
-            
+        logging.info("Creating report HTML")
+        report = HTML_report()
+        report.update_command_line()
+        report.update_params(res)
+        report.update_optimized_data(data, n_iqr=10)
+        report.update_stats(REPORT_DICT, MEANQ_LIST)
+        report.write(PARAMS["report"])            
+    
     return
 
 
@@ -89,7 +98,7 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
     # logging
     logging.info("Start batch %d" % batch_id)
     
-    # initiate `read_counter`
+    # initiate `read_counter` and `meanq_list`
     read_counter = {
         "total reads": 0,
         "skipped": 0,
@@ -100,6 +109,7 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
         "full-length/passed": 0,
         "full-length/filtered": 0
     }
+    meanq_list = []
     
     # initiate Annotator
     annotator = Annotator(
@@ -125,19 +135,15 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
     
     # iterate through reads
     for read in reads:
-        # update read counter
+        # update read counter and mean Q list
         read_counter["total reads"] += 1
-        
-        # read = indexed_fq.get(rname)
-        # skip too-short reads if `skip_short`
-        if PARAMS["skip_short"] > len(read):
-            read_counter["skipped"] += 1
-            continue
+        if PARAMS["report"]:
+            mean_q = SeqFastq.meanq(read)
+            meanq_list.append(mean_q)
+        # if (PARAMS["skip_short"] > len(read)) or (PARAMS["skip_lowq"] > mean_q):
+        #     read_counter["skipped"] += 1
+        #     continue
 
-        # skip low-quality reads if `skip_lowq` 
-        if PARAMS["skip_lowq"] > SeqFastq.meanq(read):
-            read_counter["skipped"] += 1
-            continue
 
         PASS = "passed"
         # annotate reads
@@ -178,7 +184,7 @@ def batch_worker(input_file, output_queue, batch_id, batch_size):
         read_counter[f"{CLASS}/{PASS}"] += 1
     
     logging.info(f"Finished batch {batch_id}")
-    return read_counter
+    return read_counter, meanq_list
 
 
 # listener function
@@ -243,12 +249,15 @@ def get_params():
 
 
     # optimize AP identification parameters if `--beta` is specified   
+    data = None
     if PARAMS["beta"]:
         # initialize optimizer
         optimizer = Optimizer(
             p5_sense=PARAMS["p5_sense"],
             p3_sense=PARAMS["p3_sense"]
         )
+        p5_len = len(PARAMS["p5_sense"])
+        p3_len = len(PARAMS["p3_sense"])
         
         # sample `n` reads
         logging.info("Counting records in FASTQ file")
@@ -261,47 +270,47 @@ def get_params():
         logging.info(f"Sampled {len(sampled_fq):,d} records for optimization")
     
         # optimize parameters            
-        out = optimizer.optimize(
+        out, data = optimizer.optimize(
             fq_iter=sampled_fq,
-            plens=[.5, .6, .7, .8, .9, 1.0],
-            n_iqr=[.5, 1, 1.5, 2],
+            plens=np.linspace(PARAMS["min_plen"], 1, 6),
+            n_iqr=10,
             processes=PARAMS["processes"],
             target="fscore",
             beta=PARAMS["beta"]
         )
-        
         # update `PARAMS`
         PARAMS["p5_sense"] = out["left"]["seq"]
         PARAMS["p3_sense"] = out["right"]["seq"]
         PARAMS["pid5"] = out["left"]["pid"]
         PARAMS["pid3"] = out["right"]["pid"]
-        PARAMS["pid_body"] = max(
-            out["left"]["pid"],
-            out["right"]["pid"]
-        )
+        if PARAMS["pid_body"] == None:
+            PARAMS["pid_body"] = max(PARAMS["pid5"], PARAMS["pid3"])
+        else:
+            PARAMS["pid_body"] = max(PARAMS["pid_body"], max(PARAMS["pid5"], PARAMS["pid3"])) 
         PARAMS["isl5"] = (0, int(out["left"]["loc"]))
         PARAMS["isl3"] = (-int(out["right"]["loc"]), -1)
         
+        # report results
+        perc_p5 = round(len(PARAMS["p5_sense"]) / p5_len, 1) * 100
+        perc_p3 = round(len(PARAMS["p3_sense"]) / p3_len, 1) * 100
         res = (
             f"Optimization results:\n"
-            f"5' primer:\n"
-            f"  - sequence={PARAMS['p5_sense']}\n"
+            f"5' adapter/primer:\n"
+            f"  - sequence={PARAMS['p5_sense']} (~{perc_p5}%)\n"
             f"  - percent identity cutoff={PARAMS['pid5']}\n"
             f"  - ideal searching location=({PARAMS['isl5'][0]}, {PARAMS['isl5'][1]})\n"
-            f"  - fscore={out['right']['fscore']:.2f}\n"
             f"  - precision={out['left']['prec']:.2f}\n"
             f"  - recall={out['left']['recall']:.2f}\n"
-            f"3' primer:\n"
-            f"  - sequence={PARAMS['p3_sense']}\n"
+            f"3' adapter/primer:\n"
+            f"  - sequence={PARAMS['p3_sense']} (~{perc_p3}%)\n"
             f"  - percent identity cutoff={PARAMS['pid3']}\n"
             f"  - ideal searching location=({PARAMS['isl3'][0]}, {PARAMS['isl3'][1]})\n"
-            f"  - fscore={out['right']['fscore']:.3f}\n"
             f"  - precision={out['right']['prec']:.3f}\n"
             f"  - recall={out['right']['recall']:.3f}"
         )
         logging.info(res)
             
-    return num_reads
+    return num_reads, data, res
 
 
 # extended open function
@@ -313,4 +322,4 @@ def openg(p:Path, mode:str):
     
 if __name__ == "__main__":
    main()
-   logging.info("Finished all batches.")
+   logging.info("Finished all analysis.")
