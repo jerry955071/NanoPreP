@@ -31,7 +31,7 @@ parser.add_argument(
     "--report",
     type=str,
     help="output report file (JSON)",
-    default="report.json"
+    default=None
 )
 parser.add_argument(
     "--processes",
@@ -67,6 +67,13 @@ parser.add_argument(
     help="the beta parameter for the optimization (default: .1)",
     default=.1
 )
+parser.add_argument(
+    "--min_plen",
+    type=float,
+    help="the minimal primer length to test (default: .5)",
+    default=.5
+)
+
 
 # annotaion options
 parser.add_argument(
@@ -74,18 +81,18 @@ parser.add_argument(
     action="store_true",
     help="use this flag to disable annotation"
 )
-parser.add_argument(
-    "--skip_lowq",
-    default=7,
-    type=float,
-    help="skip low-quality reads (default: 7)",
-)
-parser.add_argument(
-    "--skip_short",
-    default=0,
-    type=int,
-    help="skip too-short reads (default: 0)"
-)
+# parser.add_argument(
+#     "--skip_lowq",
+#     default=0,
+#     type=float,
+#     help="skip low-quality reads (default: 0)",
+# )
+# parser.add_argument(
+#     "--skip_short",
+#     default=0,
+#     type=int,
+#     help="skip too-short reads (default: 0)"
+# )
 parser.add_argument(
     "--p5_sense",
     type=str,

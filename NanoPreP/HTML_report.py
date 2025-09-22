@@ -1,55 +1,19 @@
+from importlib import resources as impresources
+from . import templates
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
 import numpy as np
-import json, sys
+import sys
 
 
 class HTML_report:
     def __init__(self):
-        self.template = """\
-<html>
-    <head><meta charset="utf-8" /></head>
-    <style type="text/css">
-        .gap-20 { 
-            width:100%; 
-            height:20px; 
-        }
-        .gap-10 { 
-            width:100%; 
-            height:10px; 
-        } 
-        #title {
-            font-family: Sans-serif;
-            font-size: 24px;
-            font-weight: 600;
-        }
-        #text {
-            font-family: Sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        #comment {
-            font-family: Sans-serif;
-            font-size: 12px;
-        }
-        #code {
-            font-family: Monospace;
-            font-size: 14px;
-        }
-    </style>
-    <body>
-        <div id="title">NanoPreP-optimize</div>
-        <div class="gap-20"></div>
-        <div>%(plot)</div>
-        <div id="text">Command line:</div>
-        <div id="code">nanoprep-optimize %(args)</div>
-        <div class="gap-10"></div>
-        <div id="text">Parameters:</div>
-        <div id="code">%(params)</div>
-    </body>
-</html>
-"""
+        inp_file = impresources.files(templates) / "template.html"
+        with inp_file.open("rt") as f:
+            self.template = f.read()
+    
     def write(self, path):
         with open(path, "w") as handle_html:
             handle_html.write(self.template)
@@ -85,7 +49,7 @@ class HTML_report:
                                 line_width=0,
                                 opacity=0.6
                             ),
-                            name={"positive": "Real AP (1st alignment)", "negative": "Random AP (2nd alignment)"}[cls],  # legend entry
+                            name={"positive": "True alignment (1st alignment)", "negative": "Random alignment (2nd alignment)"}[cls],  # legend entry
                             hoverinfo="skip",  # suppress hover for raw dots
                             visible=(plen_idx==0),
                             showlegend=(site == "left")
@@ -139,6 +103,7 @@ class HTML_report:
             hovermode="closest",
             xaxis_title="Sequence similarity<br>(Percent identity)",
             xaxis2_title="Sequence similarity<br>(Percent identity)",
+            xaxis_title_standoff=0,
             yaxis_title="Location<br>(<i>n</i>-bp from read termini)",
             width=1000, height=500,
         )
@@ -171,26 +136,106 @@ class HTML_report:
                     idx = base + s*traces_per_site + offset
                     if idx < total_traces:
                         visible[idx] = True
-            steps.append(dict(method="update", args=[{"visible": visible}], label=str(plen)))
+            steps.append(dict(method="update", args=[{"visible": visible}], label=f"{plen * 100}%"))
         fig.update_layout(
             sliders=[dict(
                 active=0,
-                currentvalue={"prefix":"AP length (%): "},
+                currentvalue={"prefix":"AP length: "},
                 pad={"t":80},
                 steps=steps,
                 font=dict(size=14)
-            )]
+            )],
         )
         
         # 6. Update template
-        self.template.replace("%(plot)", fig.to_html())
+        self.template = self.template.replace("%(plot)", fig.to_html())
         
         return
 
-    def update_command_line(self, cmdline):
-        self.template.replace("%(args)", " ".join(sys.argv[1:]))
+    def update_command_line(self):
+        self.template = self.template.replace("%(args)", " ".join(sys.argv[1:]))
         return
     
     def update_params(self, params):
-        self.template.replace("%(params)", json.dumps(params))
+        self.template = self.template.replace("%(params)", params)
         return
+    
+    def update_stats(self, report_dict, meanq_list):
+        df = pd.DataFrame({"Average Q-scores": meanq_list})
+        fig_meanq = px.histogram(df, x="Average Q-scores")
+        fig_meanq.update_layout(
+            template="plotly_white",
+            xaxis_title_standoff=0,
+            yaxis_title_standoff=0,
+            yaxis_title="Counts",
+        )
+        
+        # -----------------------------
+        # Create pie chart for stats
+        # -----------------------------
+        labels = [
+            "Full-length - Passed", "Truncated - Passed", "Fusion - Passed",
+            "Full-length - Filtered", "Truncated - Filtered", "Fusion - Filtered"
+        ]
+        values = [
+            report_dict["full-length/passed"], report_dict["truncated/passed"], report_dict["fusion/passed"],
+            report_dict["full-length/filtered"], report_dict["truncated/filtered"], report_dict["fusion/filtered"]
+        ]
+        colors = [
+            "#4DBF92", "#72E993", "#DEF5E5",  # Passed reads
+            "#6362A7", "#3C91E6", "#6A0B8C"   # Filtered reads
+        ]
+        fig_pie = go.Figure(go.Pie(
+            labels=labels,
+            values=values,
+            marker=dict(colors=colors),
+            name="",
+            textinfo="label+percent",
+            textposition="inside",
+            insidetextorientation="radial",
+            sort=False
+        ))
+        
+        # -----------------------------
+        # Combine into 1x2 subplot
+        # -----------------------------
+        fig_combined = make_subplots(
+            rows=1, cols=2,
+            column_widths=[0.7, 0.3],
+            specs=[[{"type": "xy"}, {"type": "domain"}]],  # histogram + pie
+            subplot_titles=("Average Q-score of input reads", "Read classification")
+        )
+
+        # Add mean Q-score histogram to left subplot
+        for trace in fig_meanq.data:
+            fig_combined.add_trace(trace, row=1, col=1)
+
+        # Add pie chart to right subplot
+        for trace in fig_pie.data:
+            fig_combined.add_trace(trace, row=1, col=2)
+
+        # Update layout
+        fig_combined.update_layout(
+            template="plotly_white",
+            width=1000, height=400,
+            showlegend=True,
+            hovermode="x",
+        )
+                    
+        # Convert to HTML string
+        self.template = self.template.replace("%(meanq)", fig_combined.to_html())
+        return
+            
+    # def update_qplot(self, meanq_list):
+    #     data = {"Average Q-scores": meanq_list}
+    #     df = pd.DataFrame(data)
+    #     fig = px.histogram(df, x="Average Q-scores")
+    #     fig.update_layout(
+    #         template="plotly_white",
+    #         xaxis_title_standoff=0,
+    #         yaxis_title_standoff=0,
+    #         yaxis_title="Counts",
+            
+    #     )
+    #     self.template = self.template.replace("%(meanq)", fig.to_html())
+    #     return
