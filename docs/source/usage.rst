@@ -1,23 +1,59 @@
 Usage
 =====
 
-After installation, NanoPrePro can be run with:
-
-.. code-block:: bash
-
-   nanoprepro run --config config.yaml
-
-Configuration
+Quick start
 -------------
 
-You must provide a `config.yaml` file specifying paths and parameters.  
-See the example configuration provided in the repository.
-
-Help
-----
-
-For command-line options:
+Standard pre-processing pipeline using NanoPrePro:
 
 .. code-block:: bash
 
-   nanoprepro --help
+   nanoprepro \
+      --input_fq input.fq \
+      --beta 0.2 \
+      --p5_sense 5_PRIMER_SEQUENCE \
+      --p3_sense A{100}3_PRIMER_SEQUENCE \
+      --filter_lowq 7 \
+      --trim_adapter \
+      --trim_poly \
+      --orientation 1 \
+      --output_full_length output.fq \
+      --report report.html
+
+This performs the following steps:
+1. $F_{\beta}$ optimization for adapter/primer alignment cutoffs
+2. Classify reads in to full-length/truncated/chimeric
+3. Remove adapter/primer sequences
+4. Remove poly A/T adjacent to adapters/primers
+5. Flip reads into sense direction
+6. Filter low-quality reads after trimming
+
+
+$F_{\beta}$ optimization for adapter/primer alignment cutoffs
+-------------
+NanoPrePro optimizes adapter/primer alignment cutoff by:
+(1) simulating true and random alignment
+(2) find the cutoff values that best separates true and random alignments
+
+True and random alignments were simulated by aligning adapter/primer sequence twice to each read.
+`--beta 0.2`
+
+Classify reads in to full-length/truncated/chimeric
+-------------
+
+Remove adapter/primer sequences
+-------------
+
+Remove poly A/T adjacent to adapters/primers
+-------------
+
+Flip reads into sense direction
+-------------
+
+Filter low-quality reads after trimming
+-------------
+
+Output files
+-------------
+- Processed FASTQ
+- HTML report
