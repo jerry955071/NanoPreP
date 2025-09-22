@@ -31,7 +31,7 @@ This performs the following steps:
 Pre-processing pipeline
 -------------
 
-:math:`F_{\beta}` optimization for adapter/primer alignment cutoffs
+:math:`F_{\beta}` optimization
 ~~~~~~~~~~~~~
 NanoPrePro optimizes adapter/primer alignment cutoff by:
 (1) simulating true and random alignment
@@ -40,22 +40,18 @@ NanoPrePro optimizes adapter/primer alignment cutoff by:
 True and random alignments were simulated by aligning adapter/primer sequence twice to each read.
 `--beta 0.2`
 
-Classify reads in to full-length/truncated/chimeric
+Read classification
 ~~~~~~~~~~~~~
 
-Remove adapter/primer sequences
+Trim adapter/primer
 ~~~~~~~~~~~~~
 
-Remove poly A/T adjacent to adapters/primers
+Trim poly A/T
 ~~~~~~~~~~~~~
 
-Flip reads into sense direction
+Reorientation
 ~~~~~~~~~~~~~
 
-Filter low-quality reads after trimming
+Filter low-quality/short reads
 ~~~~~~~~~~~~~
 
-Output files
-~~~~~~~~~~~~~
-- Processed FASTQ
-- HTML report

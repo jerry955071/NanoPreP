@@ -11,7 +11,8 @@ Processed FASTQ
 -------------
 NanoPrePro appends summaries for pre-processing to the ID lines in FASTQ records.
 
-Pre-processing summaries were recorded using the following flags: 
+Pre-processing summaries were recorded using the following flags:  
+
 +-------------+----------------+---------+----------------------------------------------------------+
 | flag        | regex          | default | explanation                                              |
 +=============+================+=========+==========================================================+
@@ -32,12 +33,11 @@ Pre-processing summaries were recorded using the following flags:
 
 Example:
 
-```
-@read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=0 poly3=-20
-AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
-+
-+,),+'$)'%671*%('&$%......((&'(*($%$&%&$-((84*
-```
+.. code-block:: bash
+    @read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=0 poly3=-20
+    AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
+    +
+    +,),+'$)'%671*%('&$%......((&'(*($%$&%&$-((84*
 
 According to the flags, the example "read1" is a sense strand (`strand=0.91`), full-length (`full_length=1`), non-chimeric (`fusion=0`),  adapter/primer removed (`ploc5=0 ploc3=0`), and polyA removed (`poly3=-20`) read.
 
