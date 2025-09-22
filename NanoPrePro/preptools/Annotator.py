@@ -1,6 +1,6 @@
-from NanoPreP.seqtools.SeqFastq import SeqFastq, SeqAnnot
-from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
-from NanoPreP.preptools.polyFinder import polyFinder
+from NanoPrePro.seqtools.SeqFastq import SeqFastq, SeqAnnot
+from NanoPrePro.aligntools.edlibAligner import edlibAligner as aligner
+from NanoPrePro.preptools.polyFinder import polyFinder
 from collections import namedtuple
 from typing import Tuple, Dict
 import re

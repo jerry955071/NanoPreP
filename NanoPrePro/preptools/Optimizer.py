@@ -1,5 +1,5 @@
-from NanoPreP.seqtools.SeqFastq import SeqFastq
-from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
+from NanoPrePro.seqtools.SeqFastq import SeqFastq
+from NanoPrePro.aligntools.edlibAligner import edlibAligner as aligner
 from typing import Tuple, Dict, List
 from multiprocessing import Pool
 import numpy as np

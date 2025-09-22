@@ -1,11 +1,11 @@
-from NanoPreP.preptools.Annotator import Annotator
-from NanoPreP.preptools.Processor import Processor
-from NanoPreP.seqtools.FastqIO import FastqIO, FastqIndexIO
-from NanoPreP.seqtools.SeqFastq import SeqFastq
+from NanoPrePro.preptools.Annotator import Annotator
+from NanoPrePro.preptools.Processor import Processor
+from NanoPrePro.seqtools.FastqIO import FastqIO, FastqIndexIO
+from NanoPrePro.seqtools.SeqFastq import SeqFastq
 # from NanoPreP.paramtools.paramsets import Params, Defaults
-from NanoPreP.paramtools.argParser import parser
-from NanoPreP.preptools.Optimizer import Optimizer
-from NanoPreP.HTML_report import HTML_report
+from NanoPrePro.paramtools.argParser import parser
+from NanoPrePro.preptools.Optimizer import Optimizer
+from NanoPrePro.HTML_report import HTML_report
 from datetime import datetime
 from pathlib import Path
 import numpy as np

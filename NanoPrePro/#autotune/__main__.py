@@ -1,8 +1,8 @@
-from NanoPreP.autotune.argParser import parser
-from NanoPreP.aligntools.edlibAligner import edlibAligner as aligner
-from NanoPreP.preptools.Annotator import Tuner
-from NanoPreP.seqtools.FastqIO import FastqIO
-from NanoPreP.seqtools.SeqFastq import SeqFastq
+from NanoPrePro.autotune.argParser import parser
+from NanoPrePro.aligntools.edlibAligner import edlibAligner as aligner
+from NanoPrePro.preptools.Annotator import Tuner
+from NanoPrePro.seqtools.FastqIO import FastqIO
+from NanoPrePro.seqtools.SeqFastq import SeqFastq
 from pathlib import Path
 import seaborn as sns
 import matplotlib.pyplot as plt

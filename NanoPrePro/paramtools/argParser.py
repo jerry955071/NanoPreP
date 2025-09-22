@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, MetavarTypeHelpFormatter
-from NanoPreP._version import __version__
+from NanoPrePro._version import __version__
 # TODO: separate each section of the options 
 # initiate ArgumentParser
 parser = ArgumentParser(

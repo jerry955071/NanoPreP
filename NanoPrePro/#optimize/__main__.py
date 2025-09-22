@@ -1,7 +1,7 @@
-from NanoPreP.optimize.argParser import parser, Defaults
-from NanoPreP.preptools.Annotator import Optimizer
-from NanoPreP.seqtools.FastqIO import FastqIO, SeqFastq
-from NanoPreP.optimize.template import template as html_template
+from NanoPrePro.optimize.argParser import parser, Defaults
+from NanoPrePro.preptools.Annotator import Optimizer
+from NanoPrePro.seqtools.FastqIO import FastqIO, SeqFastq
+from NanoPrePro.optimize.template import template as html_template
 from collections import Counter
 from pathlib import Path
 from plotly.subplots import make_subplots

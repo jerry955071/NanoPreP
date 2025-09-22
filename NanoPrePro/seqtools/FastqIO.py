@@ -1,4 +1,4 @@
-from NanoPreP.seqtools.SeqFastq import SeqFastq
+from NanoPrePro.seqtools.SeqFastq import SeqFastq
 from io import TextIOWrapper
 from pathlib import Path
 from datetime import datetime
