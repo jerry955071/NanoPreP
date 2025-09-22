@@ -1,33 +1,23 @@
 Usage
 =====
 
-.. _installation:
+After installation, NanoPrePro can be run with:
 
-Installation
-------------
+.. code-block:: bash
 
-To use Lumache, first install it using pip:
+   nanoprepro run --config config.yaml
 
-.. code-block:: console
+Configuration
+-------------
 
-   (.venv) $ pip install lumache
+You must provide a `config.yaml` file specifying paths and parameters.  
+See the example configuration provided in the repository.
 
-Creating recipes
-----------------
+Help
+----
 
-To retrieve a list of random ingredients,
-you can use the ``lumache.get_random_ingredients()`` function:
+For command-line options:
 
-.. autofunction:: lumache.get_random_ingredients
+.. code-block:: bash
 
-The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
-or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients`
-will raise an exception.
-
-.. autoexception:: lumache.InvalidKindError
-
-For example:
-
->>> import lumache
->>> lumache.get_random_ingredients()
-['shells', 'gorgonzola', 'parsley']
+   nanoprepro --help

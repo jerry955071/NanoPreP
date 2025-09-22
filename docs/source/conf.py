@@ -2,12 +2,12 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'NanoPrePro'
+copyright = '2025, Chia-Chen Chu'
+author = 'Chia-Chen Chu'
 
 release = '0.1'
-version = '0.1.0'
+version = '0.0.19'
 
 # -- General configuration
 
