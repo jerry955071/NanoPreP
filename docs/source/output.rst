@@ -34,6 +34,7 @@ Pre-processing summaries were recorded using the following flags:
 Example:
 
 .. code-block:: bash
+
     @read_1 strand=0.91 full_length=1 fusion=0 ploc5=0 ploc3=0 poly5=0 poly3=-20
     AGAGGCTGGCGGGAACGGGC......TTTCAAAGCCAGGCGGATTC
     +
@@ -46,8 +47,8 @@ HTML report
 -------------
 - Quality score histogram
 - Proportion of filtered/passed full-length/truncated/chimeric reads
-- Adapter/primer alignment cutoff optimization result
+- :math:`F_{\beta}` optimization results
 
-Adapter/primer alignment cutoff optimization result
+:math:`F_{\beta}` optimization results
 ~~~~~~~~~~~~~
 How to pick a cutoff based on this result?

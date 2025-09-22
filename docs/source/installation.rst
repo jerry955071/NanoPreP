@@ -2,11 +2,14 @@ Installation
 ============
 
 Option 1: run with Docker
+------------
+
 .. code-block:: bash
 
    docker run chiaenu/nanoprep:latest nanoprep --help
 
 Option 2: use pip install
+------------
 
 .. code-block:: bash
 
@@ -14,7 +17,6 @@ Option 2: use pip install
    nanoprepro --help
 
 Dependencies
-------------
 
 NanoPrePro requires:
 
