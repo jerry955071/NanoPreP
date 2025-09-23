@@ -16,9 +16,7 @@ Option 2: use pip install
    pip install nanoprepro
    nanoprepro --help
 
-Dependencies
-
-NanoPrePro requires:
+**Dependencies**
 
 - Python 3.7+
 - Edlib 1.3.8+

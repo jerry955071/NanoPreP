@@ -54,9 +54,9 @@ NanoPrePro then search for the alignment cutoffs that maximize the :math:`F_{\be
 
 :math:`\mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}`
 
-:math:`\mathrm{Precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}`
+:math:`\text{Precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}`
 
-:math:`\mathrm{Recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}`
+:math:`\text{Recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}`
 
 The :math:`\beta` parameter controls the weighting of precision versus recall:
 
