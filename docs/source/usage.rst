@@ -55,6 +55,7 @@ NanoPrePro then determines the alignment cutoffs that maximize the :math:`F_{\be
 the weighted harmonic mean of precision and recall:
 
 .. math::
+   :nowrap:
 
    \text{Let:} \\
    \mathrm{TP} = \text{True Positives (true alignments passes the cutoffs)} \\
@@ -62,11 +63,13 @@ the weighted harmonic mean of precision and recall:
    \mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}
 
 .. math::
+   :nowrap:
 
    \mathrm{precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}
 
 .. math::
-
+   :nowrap:
+   
    \mathrm{recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}
 
 The :math:`\beta` parameter controls the weighting of precision versus recall:
