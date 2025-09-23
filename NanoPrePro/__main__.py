@@ -247,6 +247,11 @@ def get_params():
         config = json.load(open(args.config))
         PARAMS.update(config)
 
+    # aport if --trim_poly but not --trim_adapter
+    if PARAMS["trim_poly"]:
+        if not PARAMS["trim_adapter"]:
+            logging.error("--trim_poly is only applicable if --trim_adapter is used")
+            sys.exit(1)
 
     # optimize AP identification parameters if `--beta` is specified   
     data = None
