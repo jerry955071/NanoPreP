@@ -7,7 +7,7 @@ copyright = '2025, Chia-Chen Chu'
 author = 'Chia-Chen Chu'
 
 release = '0.1'
-version = '0.0.19'
+version = '0.0.20'
 
 # -- General configuration
 
