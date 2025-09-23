@@ -51,9 +51,9 @@ NanoPrePro finds the alignment cutoffs that maximize the `F_{\beta}` score (:cod
 the weighted harmonic mean of precision and recall, with precision and recall calculated as: 
 
 .. math::
-`\text{precision} = \frac{true alignments accepted by the cutoffs}{random alignments accepted by the cutoffs + true alignments accepted by the cutoffs}`
+\text{precision} = \frac{true alignments accepted by the cutoffs}{random alignments accepted by the cutoffs + true alignments accepted by the cutoffs}
 
-`\text{recall} = \frac{true alignments accepted by the cutoffs}{all true alignments}`
+\text{recall} = \frac{true alignments accepted by the cutoffs}{all true alignments}
 
 
 .. _read_classification:
