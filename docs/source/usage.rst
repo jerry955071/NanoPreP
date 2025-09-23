@@ -1,10 +1,10 @@
 Usage
 =====
 
-Quick start
--------------
+Quick Start
+-----------
 
-Standard pre-processing pipeline using NanoPrePro:
+Run a standard preprocessing pipeline using NanoPrePro as follows:
 
 .. code-block:: bash
 
@@ -20,80 +20,155 @@ Standard pre-processing pipeline using NanoPrePro:
       --output_full_length output.fq \
       --report report.html
 
-This performs the following pre-processing steps and created a report file :code:`--report report.html`:
+This command performs the following preprocessing steps and generates a report file (:code:`report.html`):
 
-1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`here <f_beta_optimization>`)
-2. :code:`--output_full_length output.fq`: identify full-length reads (see :ref:`here <read_classification>`)
-3. :code:`--trim_adapter`: trim adapter/primer (see :ref:`here <trim_ap>`)
-4. :code:`--trim_poly`: trim poly A/T (see :ref:`here <trim_poly>`)
-5. :code:`--orientation 1`: reorientation (see :ref:`here <reorient>`)
-6. :code:`--filter_lowq 7`: filter low-quality reads (see :ref:`here <read_filter>`)
+1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`here <f_beta_optimization>`).
+2. :code:`--output_full_length output.fq`: identifies full-length reads (see :ref:`here <read_classification>`).
+3. :code:`--trim_adapter`: trims adapter/primer sequences (see :ref:`here <trim_ap>`).
+4. :code:`--trim_poly`: trims poly(A/T) sequences (see :ref:`here <trim_poly>`).
+5. :code:`--orientation 1`: reorients reads (see :ref:`here <reorient>`).
+6. :code:`--filter_lowq 7`: filters low-quality reads (see :ref:`here <read_filter>`).
 
-Pre-processing pipeline
--------------
+Preprocessing Pipeline
+----------------------
 
 .. _f_beta_optimization:
 
-:math:`F_{\beta}` optimization
-~~~~~~~~~~~~~
-NanoPrePro optimizes adapter/primer alignment cutoff by:
+Step 1. :math:`F_{\beta}` Optimization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Simulating true and random alignment
-2. Find the cutoff values that best separates true and random alignments
+NanoPrePro optimizes adapter/primer alignment cutoffs by:
 
-First, the adapter/primer sequences provided by user (:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`) 
-are aligned twice to each reads.
+1. Simulating both true and random alignments.  
+2. Identifying cutoff values that best separate true from random alignments.  
+
+Adapter/primer sequences provided by the user (:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`)  
+are aligned twice to each read.
 
 .. note::
 
-   The expression :code:`A{100}` means that there are at most 100 :code:`A`s in front of the 3' adapter/primer and is **NOT** used for alignment. 
-   See :ref:`Poly A/T trimming<trim_poly>` for details.
+   :code:`A{100}` indicates that up to 100 consecutive :code:`A` nucleotides 
+   may occur adjacent to the 3′ adapter/primer. These bases are **not** used 
+   for alignment. See :ref:`Poly A/T trimming <trim_poly>` for details.
 
-Second, NanoPrePro finds the alignment cutoffs that maximize the :math:`F_{\beta}` score (:code:`--beta <float>`), 
-the weighted harmonic mean of precision and recall, with precision and recall calculated as: 
-
-.. math::
-
-   \text{precision} = \frac{true alignments accepted by the cutoffs}{random alignments accepted by the cutoffs + true alignments accepted by the cutoffs}
-
-   \text{recall} = \frac{true alignments accepted by the cutoffs}{all true alignments}
-
-The weight on precision and recall is controlled by the :math:`\beta` value. 
-Higher :math:`\beta` favors recall and lower :math:`\beta` favors precision.
-For the recommended range of :math:`\beta` values for ONT datasets of varying 
-kit and chemistry, please refer to our :ref:`manuscript<#TODO>`.
+NanoPrePro then determines the alignment cutoffs that maximize the :math:`F_{\beta}` score (:code:`--beta <float>`),  
+the weighted harmonic mean of precision and recall:
 
 .. math::
 
-   F_{\beta} = (1 + \beta^2) \cdot \frac{\text{precision} \cdot \text{recall}}
-   {(\beta^2 \cdot \text{precision}) + \text{recall}}
+   \mathrm{precision} = 
+   \frac{\text{True alignments accepted by cutoffs}}
+        {\text{True alignments accepted by cutoffs} + \text{Random alignments accepted by cutoffs}}
 
+   \mathrm{recall} = 
+   \frac{\text{True alignments accepted by cutoffs}}
+        {\text{All true alignments}}
 
-The cutoff values achieving the highest :math:`F_{\beta}` score will be used to identify adapters/primers.
+The :math:`\beta` parameter controls the weighting of precision versus recall:
+
+- Higher :math:`\beta` values emphasize recall.  
+- Lower :math:`\beta` values emphasize precision.  
+
+For recommended :math:`\beta` ranges for ONT datasets with different kits and chemistries,  
+please refer to our :ref:`manuscript <#TODO>`.
+
+.. math::
+
+   F_{\beta} = (1 + \beta^2) \cdot \frac{\mathrm{precision} \cdot \mathrm{recall}}
+   {(\beta^2 \cdot \mathrm{precision}) + \mathrm{recall}}
+
+The cutoff values achieving the highest :math:`F_{\beta}` score are used for adapter/primer identification.
 
 .. _read_classification:
 
-Full-length/truncated/chimeric reads identification
-~~~~~~~~~~~~~
+Step 2. Full-Length / Truncated / Chimeric Read Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Reads are classified into three categories based on adapter/primer alignment results:
+
+- **Full-length**: 5' and 3' adapter/primer present, no internal adapters/primers.  
+- **Chimeric**: contains internal adapter/primer sequences.  
+- **Truncated**: neither chimeric nor full-length.
+
+Output files for each read type can be specified as:
+
+- Full-length: :code:`--output_full_length` (default to standard output).  
+- Chimeric: :code:`--output_fusion`.  
+- Truncated: :code:`--output_truncated`.
 
 .. _trim_ap:
 
-Adapter/primer trimming
-~~~~~~~~~~~~~
+Step 3. Adapter/Primer Trimming
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This step is activated with :code:`--trim_adapter`.  
+It removes flanking (5' and/or 3') adapter/primer sequences from the output reads.
+
+.. note::
+
+   Trimming is applied to all requested output reads, regardless of read type.
 
 .. _trim_poly:
 
-Poly A/T trimming
-~~~~~~~~~~~~~
+Step 4. Poly(A/T) Trimming
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This step is activated with :code:`--trim_poly`.  
+The expected length, location, and nucleotide of mono-polymers are assigned along with the primer sequence.
+
+Use a pattern like `N{M}` to specify the location and length of polyA/T tails. For example, this command tells NanoPrePro that poly"A" tails of up to 50 nucleotides occur adjacent to the 3' adapters/primers:
+
+.. code::
+
+   --p3_sense A{50}GACTA
 
 .. _reorient:
 
-Re-orientation
-~~~~~~~~~~~~~
+Step 5. Read Reorientation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Read strands are determined based on the orientation of aligned adapter/primer sequences.  
+Adapter/primer sequences should be provided in the sense direction.  
+Reads aligned to the reverse complement are classified as antisense.
+
+Reorientation can be performed using :code:`--orientation [0, 1, -1]`:
+
+- `1`: sense direction  
+- `-1`: antisense  
+- `0`: do not reorient
 
 .. _read_filter:
 
-Filter low-quality reads
-~~~~~~~~~~~~~
+Step 6. Filtering Low-Quality Reads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Average Q-scores are calculated after trimming adapter/primer/polyA(T) sequences (if applied).  
+Trimming removes low-quality regions at read termini, providing a more accurate measure of read quality.
+
+Step 7. Output
+~~~~~~~~~~~~~~
+
+NanoPrePro produces:
+
+- **FASTQ**: processed reads  
+- **HTML report**: summary of preprocessing statistics
+
+**FASTQ Files**  
+
+Processed reads are saved separately for full-length, truncated, and chimeric reads.  
+Output file names can be assigned with :code:`--output_full_length`, :code:`--output_truncated`, and :code:`--output_fusion`.
+
+.. note::
+
+   Gzip-compressed FASTQ files are supported. For example:  
+   :code:`--output_full_length output.fq.gz`
+
+Per-read annotations are appended to FASTQ read IDs.  
+See :doc:`output<per_read_annotation>` for details.
+
+**HTML Report**  
+
+Written to the file specified by :code:`--report`.  
+The report includes Q-score distributions, the proportion of full-length/truncated/chimeric reads, and adapter/primer alignment results from :math:`F_{\beta}` optimization, helping users choose desired cutoffs.
+
+See :doc:`output<guideline>` for guidelines on manually selecting alignment cutoffs based on simulated alignment data.

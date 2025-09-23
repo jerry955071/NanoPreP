@@ -3,10 +3,11 @@ Output
 
 NanoPrePro generates:
 
-- Pre-processed FASTQ
+- Processed FASTQ
 - HTML report
 
 
+.. _per_read_annotation:
 Processed FASTQ
 -------------
 NanoPrePro appends summaries for pre-processing to the ID lines in FASTQ records.
