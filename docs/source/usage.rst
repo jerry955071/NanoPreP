@@ -42,17 +42,11 @@ NanoPrePro optimizes adapter/primer alignment cutoffs by:
 1. Simulating both true and random alignments.  
 2. Identifying cutoff values that best separate true from random alignments.  
 
-Adapter/primer sequences provided by the user are aligned twice to each read. 
+First, the adapter/primer sequences provided by the user are aligned twice to each read. 
 (:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`)
 
-.. note::
-
-   :code:`A{100}` indicates that up to 100 consecutive :code:`A` nucleotides 
-   may occur adjacent to the 3′ adapter/primer. These bases are **NOT** used 
-   for alignment. See :ref:`Poly A/T trimming <trim_poly>` for details.
-
-NanoPrePro then determines the alignment cutoffs that maximize the :math:`F_{\beta}` score (:code:`--beta <float>`),  
-the weighted harmonic mean of precision and recall:
+NanoPrePro then search for the alignment cutoffs that maximize the :math:`F_{\beta}` score 
+(:code:`--beta <float>`), the weighted harmonic mean of precision and recall.
 
 :math:`\mathrm{TP} = \text{True Positives (true alignments that passe the cutoffs)}`
 
@@ -60,9 +54,9 @@ the weighted harmonic mean of precision and recall:
 
 :math:`\mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}`
 
-:math:`\mathrm{precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}`
+:math:`\mathrm{Precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}`
 
-:math:`\mathrm{recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}`
+:math:`\mathrm{Recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}`
 
 The :math:`\beta` parameter controls the weighting of precision versus recall:
 
@@ -78,6 +72,13 @@ For recommended :math:`\beta` ranges for ONT datasets with different kits and ch
 please refer to our :ref:`manuscript <#TODO>`.
 
 The cutoff values achieving the highest :math:`F_{\beta}` score are used for adapter/primer identification.
+
+.. note::
+
+   :code:`A{100}` indicates that up to 100 consecutive :code:`A` nucleotides 
+   may occur adjacent to the 3′ adapter/primer. These bases are **NOT** used 
+   for alignment. See :ref:`Poly A/T trimming <trim_poly>` for details.
+
 
 .. _read_classification:
 

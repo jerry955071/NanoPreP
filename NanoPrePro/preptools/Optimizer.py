@@ -142,7 +142,7 @@ class Optimizer:
         
         # get loc targets
         tmp_loc = data[data["cls"] == "positive"]["loc"]
-        isls = np.linspace(tmp_loc.median(), tmp_loc.quantile(.9), n_iqr).flatten()
+        isls = np.linspace(tmp_loc.median(), tmp_loc.quantile(.99), n_iqr).flatten()
         
         # iter over pid and loc targets
         for pid in pids:
