@@ -22,12 +22,12 @@ Standard pre-processing pipeline using NanoPrePro:
 
 This performs the following pre-processing steps:
 
-1. :ref:`:math:`F_{\beta}` optimization <f_beta_optimization>` (:code:`--beta 0.2`)
-2. Identify full-length/truncated/chimeric reads (:code:`--output_full_length output.fq`)
-3. Trim adapter/primer (:code:`--trim_adapter`)
-4. Trim poly A/T (:code:`--trim_poly`)
-5. Reorientation (:code:`--orientation 1`)
-6. Filter low-quality reads (:code:`--filter_lowq 7`)
+1. :code:`--beta 0.2`: :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`here <f_beta_optimization>`)
+2. :code:`--output_full_length output.fq`: identify full-length reads (see :ref:`here <read_classification>`)
+3. :code:`--trim_adapter`: trim adapter/primer (see :ref:`here <trim_ap>`)
+4. :code:`--trim_poly`: trim poly A/T (see :ref:`here <trim_poly>`)
+5. :code:`--orientation 1`: reorientation (see :ref:`here <reorient>`)
+6. :code:`--filter_lowq 7`: filter low-quality reads (see :ref:`here <read_filter>`)
 
 
 
@@ -45,18 +45,27 @@ NanoPrePro optimizes adapter/primer alignment cutoff by:
 2. Find the cutoff values that best separates true and random alignments
 
 
+.. _read_classification:
 
 Identify full-length/truncated/chimeric reads
 ~~~~~~~~~~~~~
 
+.. _trim_ap:
+
 Trim adapter/primer
 ~~~~~~~~~~~~~
+
+.. _trim_poly:
 
 Trim poly A/T
 ~~~~~~~~~~~~~
 
+.. _reorient:
+
 Reorientation
 ~~~~~~~~~~~~~
+
+.. _read_filter:
 
 Filter low-quality reads
 ~~~~~~~~~~~~~
