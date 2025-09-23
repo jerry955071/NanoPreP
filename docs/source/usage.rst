@@ -20,26 +20,31 @@ Standard pre-processing pipeline using NanoPrePro:
       --output_full_length output.fq \
       --report report.html
 
-This performs the following steps:
+This performs the following pre-processing steps:
 
-1. :math:`F_{\beta}` optimization (:code:`--beta 0.2`)
+1. :ref:`:math:`F_{\beta}` optimization <f_beta_optimization>` (:code:`--beta 0.2`)
 2. Identify full-length/truncated/chimeric reads (:code:`--output_full_length output.fq`)
 3. Trim adapter/primer (:code:`--trim_adapter`)
 4. Trim poly A/T (:code:`--trim_poly`)
 5. Reorientation (:code:`--orientation 1`)
 6. Filter low-quality reads (:code:`--filter_lowq 7`)
 
+
+
 Pre-processing pipeline
 -------------
+
+.. _f_beta_optimization:
 
 :math:`F_{\beta}` optimization
 ~~~~~~~~~~~~~
 Identifying adapter/primer is the basis of pre-processing by NanoPrePro.
-
 NanoPrePro optimizes adapter/primer alignment cutoff by:
 
 1. Simulating true and random alignment
 2. Find the cutoff values that best separates true and random alignments
+
+
 
 Identify full-length/truncated/chimeric reads
 ~~~~~~~~~~~~~
