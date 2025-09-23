@@ -42,13 +42,13 @@ NanoPrePro optimizes adapter/primer alignment cutoffs by:
 1. Simulating both true and random alignments.  
 2. Identifying cutoff values that best separate true from random alignments.  
 
-Adapter/primer sequences provided by the user (:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`)  
-are aligned twice to each read.
+Adapter/primer sequences provided by the user are aligned twice to each read. 
+(:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`)
 
 .. note::
 
    :code:`A{100}` indicates that up to 100 consecutive :code:`A` nucleotides 
-   may occur adjacent to the 3′ adapter/primer. These bases are **not** used 
+   may occur adjacent to the 3′ adapter/primer. These bases are **NOT** used 
    for alignment. See :ref:`Poly A/T trimming <trim_poly>` for details.
 
 NanoPrePro then determines the alignment cutoffs that maximize the :math:`F_{\beta}` score (:code:`--beta <float>`),  
@@ -56,13 +56,18 @@ the weighted harmonic mean of precision and recall:
 
 .. math::
 
-   \mathrm{precision} = 
-   \frac{\text{True alignments accepted by cutoffs}}
-        {\text{True alignments accepted by cutoffs} + \text{Random alignments accepted by cutoffs}}
+   \text{Let:} \\
+   \mathrm{TP} = \text{True Positives (true alignments passes the cutoffs)} \\
+   \mathrm{FP} = \text{False Positives (random alignments passes the cutoffs)} \\
+   \mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}
 
-   \mathrm{recall} = 
-   \frac{\text{True alignments accepted by cutoffs}}
-        {\text{All true alignments}}
+.. math::
+
+   \mathrm{precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}
+
+.. math::
+
+   \mathrm{recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}
 
 The :math:`\beta` parameter controls the weighting of precision versus recall:
 
@@ -116,11 +121,16 @@ Step 4. Poly(A/T) Trimming
 This step is activated with :code:`--trim_poly`.  
 The expected length, location, and nucleotide of mono-polymers are assigned along with the primer sequence.
 
-Use a pattern like `N{M}` to specify the location and length of polyA/T tails. For example, this command tells NanoPrePro that poly"A" tails of up to 50 nucleotides occur adjacent to the 3' adapters/primers:
+Use a pattern like :code:`N{M}` to specify the location and length of polyA/T tails. For example, this command tells NanoPrePro that poly :code:`A` tails of up to :code:`50` nucleotides occur adjacent to the 3' adapters/primers:
 
 .. code::
 
    --p3_sense A{50}GACTA
+
+.. note::
+
+   Poly(A/T) trimming is applicable only if adapters/primers are trimmed. 
+   Similar to adapter/primer trimming, this step can be performed on all classes of output reads. 
 
 .. _reorient:
 
@@ -164,11 +174,12 @@ Output file names can be assigned with :code:`--output_full_length`, :code:`--ou
    :code:`--output_full_length output.fq.gz`
 
 Per-read annotations are appended to FASTQ read IDs.  
-See :doc:`output<per_read_annotation>` for details.
+See :ref:`output<per_read_annotation>` for details.
 
 **HTML Report**  
 
 Written to the file specified by :code:`--report`.  
-The report includes Q-score distributions, the proportion of full-length/truncated/chimeric reads, and adapter/primer alignment results from :math:`F_{\beta}` optimization, helping users choose desired cutoffs.
+The report includes Q-score distributions, the proportion of full-length/truncated/chimeric reads, and adapter/primer alignment results from :math:`F_{\beta}` optimization.
 
-See :doc:`output<guideline>` for guidelines on manually selecting alignment cutoffs based on simulated alignment data.
+The simulated alignment results help users manually picking cutoffs. 
+See :ref:`output<guideline>` for guidelines on manually selecting alignment cutoffs based on simulated alignment data.
