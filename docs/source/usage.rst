@@ -52,21 +52,22 @@ NanoPrePro then search for the alignment cutoffs that maximize the :math:`F_{\be
 
 :math:`\text{Recall} = \frac{\text{true alignments that pass the cutoffs}}{\text{all true alignments}}`
 
-The :math:`\beta` parameter controls the weighting of precision versus recall:
-
-- Higher :math:`\beta` values emphasize recall.  
-- Lower :math:`\beta` values emphasize precision.  
+:math:`F_{\beta}` score is calculated as:
 
 .. math::
 
    F_{\beta} = (1 + \beta^2) \cdot \frac{\mathrm{precision} \cdot \mathrm{recall}}
    {(\beta^2 \cdot \mathrm{precision}) + \mathrm{recall}}
 
+The :math:`\beta` parameter controls the weighting of precision versus recall:
+
+- Higher :math:`\beta` values emphasize recall.  
+- Lower :math:`\beta` values emphasize precision.  
+
 The alignment cutoff values achieving the highest :math:`F_{\beta}` score are used for adapter/primer identification.
 
-For recommended :math:`\beta` ranges for ONT datasets with different kits and chemistries,  
-please refer to our :ref:`manuscript <#TODO>`.
-
+For recommended :math:`\beta` ranges for ONT datasets generated using 
+different kits, chemistries, and basecalling models please refer to our :ref:`manuscript <#TODO>`.
 
 .. note::
 
