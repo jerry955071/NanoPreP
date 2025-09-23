@@ -8,6 +8,7 @@ NanoPrePro generates:
 
 
 .. _per_read_annotation:
+
 Processed FASTQ
 -------------
 NanoPrePro appends summaries for pre-processing to the ID lines in FASTQ records.
@@ -52,4 +53,7 @@ HTML report
 
 :math:`F_{\beta}` optimization results
 ~~~~~~~~~~~~~
+
+.. _guideline:
+
 How to pick a cutoff based on this result?

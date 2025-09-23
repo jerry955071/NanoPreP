@@ -54,36 +54,28 @@ Adapter/primer sequences provided by the user are aligned twice to each read.
 NanoPrePro then determines the alignment cutoffs that maximize the :math:`F_{\beta}` score (:code:`--beta <float>`),  
 the weighted harmonic mean of precision and recall:
 
-.. math::
-   :nowrap:
+:math:`\mathrm{TP} = \text{True Positives (true alignments that passe the cutoffs)}`
 
-   \text{Let:} \\
-   \mathrm{TP} = \text{True Positives (true alignments passes the cutoffs)} \\
-   \mathrm{FP} = \text{False Positives (random alignments passes the cutoffs)} \\
-   \mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}
+:math:`\mathrm{FP} = \text{False Positives (random alignments that passe the cutoffs)}`
 
-.. math::
-   :nowrap:
+:math:`\mathrm{FN} = \text{False Negatives (true alignments rejected by the cutoffs)}`
 
-   \mathrm{precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}
+:math:`\mathrm{precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}`
 
-.. math::
-   :nowrap:
-   
-   \mathrm{recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}
+:math:`\mathrm{recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}`
 
 The :math:`\beta` parameter controls the weighting of precision versus recall:
 
 - Higher :math:`\beta` values emphasize recall.  
 - Lower :math:`\beta` values emphasize precision.  
 
-For recommended :math:`\beta` ranges for ONT datasets with different kits and chemistries,  
-please refer to our :ref:`manuscript <#TODO>`.
-
 .. math::
 
    F_{\beta} = (1 + \beta^2) \cdot \frac{\mathrm{precision} \cdot \mathrm{recall}}
    {(\beta^2 \cdot \mathrm{precision}) + \mathrm{recall}}
+
+For recommended :math:`\beta` ranges for ONT datasets with different kits and chemistries,  
+please refer to our :ref:`manuscript <#TODO>`.
 
 The cutoff values achieving the highest :math:`F_{\beta}` score are used for adapter/primer identification.
 
@@ -96,7 +88,7 @@ Reads are classified into three categories based on adapter/primer alignment res
 
 - **Full-length**: 5' and 3' adapter/primer present, no internal adapters/primers.  
 - **Chimeric**: contains internal adapter/primer sequences.  
-- **Truncated**: neither chimeric nor full-length.
+- **Truncated**: not chimeric and not full-length.
 
 Output files for each read type can be specified as:
 
@@ -140,9 +132,9 @@ Use a pattern like :code:`N{M}` to specify the location and length of polyA/T ta
 Step 5. Read Reorientation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Read strands are determined based on the orientation of aligned adapter/primer sequences.  
-Adapter/primer sequences should be provided in the sense direction.  
-Reads aligned to the reverse complement are classified as antisense.
+Read strands are determined based on the orientation of aligned adapters/primers.  
+Adapter/primer sequences should be provided in the sense direction (:code:`--p5_sense` , :code:`--p3_sense`).  
+Reads are determined antisense if adapters/primers are aligned in the antisense direction.
 
 Reorientation can be performed using :code:`--orientation [0, 1, -1]`:
 
