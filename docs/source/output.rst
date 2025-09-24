@@ -14,6 +14,20 @@ Processed FASTQ
 NanoPrePro appends preprocessing annotations to the FASTQ read IDs.  
 These annotations use standardized flags, summarized below:
 
+
+================ ============ ======= ==========================================================
+flag             regex        default explanation
+================ ============ ======= ==========================================================
+``strand``       -?\d+\.\d*   0       0: unknown; > 0: sense; < 0: antisense
+``full_length``  [0|1]        0       0: non-full-length; 1: full-length
+``fusion``       [0|1]        0       0: non-chimeric/fusion; 1: chimeric/fusion
+``ploc5``        -?\d+        -1      -1: unknown; 0: removed; > 0: 5' adapter/primer location
+``ploc3``        -?\d+        -1      -1: unknown; 0: removed; > 0: 3' adapter/primer location
+``poly5``        -?\d+        0       0: unknown; > 0: 5' poly length; < 0: trimmed 5' poly
+``poly3``        -?\d+        0       0: unknown; > 0: 3' poly length; < 0: trimmed 3' poly
+================ ============ ======= ==========================================================
+
+
 +----------------+----------------+---------+----------------------------------------------------------+
 | flag           | regex          | default | explanation                                              |
 +================+================+=========+==========================================================+
