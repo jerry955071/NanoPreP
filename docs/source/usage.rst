@@ -4,30 +4,35 @@ Usage
 Quick Start
 -----------
 
+Assume your sequence library looks like this:
+
+.. image:: images/library_construction.png
+   :alt: library construction
+
 Run a standard preprocessing pipeline using NanoPrePro as follows:
 
 .. code-block:: bash
 
    nanoprepro \
       --input_fq input.fq \
+      --p5_sense ATCGATCG \
+      --p3_sense A{20}GCAATGA \
       --beta 0.2 \
-      --p5_sense 5_PRIMER_SEQUENCE \
-      --p3_sense A{100}3_PRIMER_SEQUENCE \
-      --filter_lowq 7 \
+      --output_full_length output.fq \
       --trim_adapter \
       --trim_poly \
       --orientation 1 \
-      --output_full_length output.fq \
+      --filter_lowq 7 \
       --report report.html
 
 This command performs the following preprocessing steps and generates a report file (:code:`report.html`):
 
-1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`here <f_beta_optimization>`).
-2. :code:`--output_full_length output.fq`: identifies full-length reads (see :ref:`here <read_classification>`).
-3. :code:`--trim_adapter`: trims adapter/primer sequences (see :ref:`here <trim_ap>`).
-4. :code:`--trim_poly`: trims poly(A/T) sequences (see :ref:`here <trim_poly>`).
-5. :code:`--orientation 1`: reorients reads (see :ref:`here <reorient>`).
-6. :code:`--filter_lowq 7`: filters low-quality reads (see :ref:`here <read_filter>`).
+1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`Step 1 <f_beta_optimization>`).
+2. :code:`--output_full_length output.fq`: identifies full-length reads (see :ref:`Step 2 <read_classification>`).
+3. :code:`--trim_adapter`: trims adapter/primer sequences (see :ref:`Step 3 <trim_ap>`).
+4. :code:`--trim_poly`: trims poly(A/T) sequences (see :ref:`Step 4 <trim_poly>`).
+5. :code:`--orientation 1`: reorients reads to sense strand (see :ref:`Step 5 <reorient>`).
+6. :code:`--filter_lowq 7`: filters low-quality (avg. Q-score < 7) reads (see :ref:`Step 6 <read_filter>`).
 
 Preprocessing Pipeline
 ----------------------
@@ -43,7 +48,7 @@ NanoPrePro optimizes adapter/primer alignment cutoffs by:
 2. Identifying cutoff values that best separate true from random alignments.  
 
 First, the adapter/primer sequences provided by the user are aligned twice to each read. 
-(:code:`--p5_sense 5_PRIMER_SEQUENCE` and :code:`--p3_sense A{100}3_PRIMER_SEQUENCE`)
+(:code:`--p5_sense ATCGATCG` and :code:`--p3_sense A{20}GCAATGA`)
 
 NanoPrePro then search for the alignment cutoffs that maximize the :math:`F_{\beta}` score 
 (:code:`--beta <float>`), the weighted harmonic mean of precision and recall:
@@ -71,7 +76,7 @@ different kits, chemistries, and basecalling models please refer to our :ref:`ma
 
 .. note::
 
-   :code:`A{100}` indicates that up to 100 consecutive :code:`A` nucleotides 
+   :code:`A{20}` indicates that up to 20 consecutive :code:`A` nucleotides 
    may occur adjacent to the 3′ adapter/primer. These bases are **NOT** used 
    for alignment. See :ref:`Poly A/T trimming <trim_poly>` for details.
 
@@ -113,11 +118,12 @@ Step 4. Poly(A/T) Trimming
 This step is activated with :code:`--trim_poly`.  
 The expected length, location, and nucleotide of mono-polymers are assigned along with the primer sequence.
 
-Use a pattern like :code:`N{M}` to specify the location and length of polyA/T tails. For example, this command tells NanoPrePro that poly :code:`A` tails of up to :code:`50` nucleotides occur adjacent to the 3' adapters/primers:
+Use a pattern like :code:`N{M}` to specify the location and length of polyA/T tails. 
+For example, this command tells NanoPrePro that poly :code:`A` tails of up to :code:`20` nucleotides are adjacent to the 3' adapters/primers:
 
 .. code::
 
-   --p3_sense A{50}GACTA
+   --p3_sense A{20}GCAATGA
 
 .. note::
 
@@ -133,7 +139,7 @@ Read strands are determined based on the orientation of aligned adapters/primers
 Adapter/primer sequences should be provided in the sense direction (:code:`--p5_sense` , :code:`--p3_sense`).  
 Reads are determined antisense if adapters/primers are aligned in the antisense direction.
 
-Reorientation can be performed using :code:`--orientation [0, 1, -1]`:
+Reorientation can be performed using :code:`--orientation 1/-1/0`:
 
 - `1`: sense direction  
 - `-1`: antisense  
