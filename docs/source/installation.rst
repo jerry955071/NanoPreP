@@ -1,6 +1,16 @@
 Installation
 ============
 
+
+**Dependencies**
+
+- Python 3.7+
+- Edlib 1.3.8+
+- Pandas
+- NumPy
+- Plotly
+
+
 Option 1: run with Docker
 ------------
 
@@ -15,11 +25,3 @@ Option 2: use pip install
 
    pip install nanoprepro
    nanoprepro --help
-
-**Dependencies**
-
-- Python 3.7+
-- Edlib 1.3.8+
-- Pandas
-- NumPy
-- Plotly

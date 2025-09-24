@@ -4,10 +4,11 @@ Usage
 Quick Start
 -----------
 
-Assume your sequence library looks like this:
+Suppose your sequence library looks like this:
 
 .. image:: images/library_construction.png
    :alt: library construction
+
 
 Run a standard preprocessing pipeline using NanoPrePro as follows:
 
@@ -15,8 +16,8 @@ Run a standard preprocessing pipeline using NanoPrePro as follows:
 
    nanoprepro \
       --input_fq input.fq \
-      --p5_sense ATCGATCG \
-      --p3_sense A{20}GCAATGA \
+      --p5_sense ATCGATCG \ # 5' adapter/primer sequence (sense strand; 5' to 3')
+      --p3_sense A{20}GCAATGA \ # 3' adapter/primer sequence (sense strand; 5' to 3')
       --beta 0.2 \
       --output_full_length output.fq \
       --trim_adapter \
@@ -25,7 +26,8 @@ Run a standard preprocessing pipeline using NanoPrePro as follows:
       --filter_lowq 7 \
       --report report.html
 
-This command performs the following preprocessing steps and generates a report file (:code:`report.html`):
+This command performs the following preprocessing steps and 
+generates a report file (:code:`report.html`):
 
 1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`Step 1 <f_beta_optimization>`).
 2. :code:`--output_full_length output.fq`: identifies full-length reads (see :ref:`Step 2 <read_classification>`).
@@ -70,9 +72,6 @@ The :math:`\beta` parameter controls the weighting of precision versus recall:
 - Lower :math:`\beta` values emphasize precision.  
 
 The alignment cutoff values achieving the highest :math:`F_{\beta}` score are used for adapter/primer identification.
-
-For recommended :math:`\beta` ranges for ONT datasets generated using 
-different kits, chemistries, and basecalling models please refer to our :ref:`manuscript <#TODO>`.
 
 .. note::
 
@@ -152,6 +151,7 @@ Step 6. Filtering Low-Quality Reads
 
 Average Q-scores are calculated after trimming adapter/primer/polyA(T) sequences (if applied).  
 Trimming removes low-quality regions at read termini, providing a more accurate measure of read quality.
+The threshold for filtering low-quality reads can be set with :code:`--filter_lowq <int>`.
 
 Step 7. Output
 ~~~~~~~~~~~~~~
