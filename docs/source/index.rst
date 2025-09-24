@@ -1,7 +1,7 @@
 NanoPrePro Documentation
 ========================
 
-NanoPrePro is a preprocessing pipeline for Oxford Nanopore cDNA sequencing data.
+NanoPrePro is a preprocessing pipeline for Oxford Nanopore transcriptomic sequencing data.
 
 .. toctree::
    :maxdepth: 2
@@ -9,14 +9,13 @@ NanoPrePro is a preprocessing pipeline for Oxford Nanopore cDNA sequencing data.
 
    installation
    usage
-   pipeline
    output
 
 
 Citation
 ~~~~~~~~~~
 
-If you use NanoPrePro in your research, please consider citing:
+If you use NanoPrePro in your research, please cite:
 
 Chu C, Yu J, Kuo S, Yang F, Lin C, Chen C, Wu Y, Shih C, 
 Sun Y, Mai T, Chen Y, Lin H, Su J, Lin Y (2025). 

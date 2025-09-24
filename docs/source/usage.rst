@@ -87,7 +87,7 @@ Reads are classified into three categories based on adapter/primer alignment res
 - **Chimeric**: contains internal adapter/primer sequences.  
 - **Truncated**: not chimeric and not full-length.
 
-Output files for each read type can be specified as:
+Output files for each read type can be specified using:
 
 - Full-length: :code:`--output_full_length` (default to standard output).  
 - Chimeric: :code:`--output_fusion`.  

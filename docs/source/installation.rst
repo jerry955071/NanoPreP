@@ -6,7 +6,7 @@ Option 1: run with Docker
 
 .. code-block:: bash
 
-   docker run chiaenu/nanoprep:latest nanoprep --help
+   docker run chiaenu/nanoprep:latest nanoprepro --help
 
 Option 2: use pip install
 ------------
