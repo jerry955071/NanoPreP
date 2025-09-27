@@ -1,7 +1,7 @@
-Output
+Output Documentation
 ======
 
-NanoPrePro produces two main outputs:
+NanoPrePro produces two types of output files:
 
 - **Processed FASTQ** with per-read annotations
 - **HTML report** summarizing pre-processing results

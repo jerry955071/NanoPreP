@@ -9,7 +9,7 @@ NanoPrePro is a pre-processor for Oxford Nanopore transcriptomic sequencing data
 
    installation
    usage
-   output_documentation
+   output
 
 
 Citation
