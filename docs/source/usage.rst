@@ -10,7 +10,7 @@ Suppose your sequence library looks like this:
    :alt: library construction
 
 
-Run a standard preprocessing pipeline using NanoPrePro as follows:
+Run a standard pre-processing pipeline using NanoPrePro as follows:
 
 .. code-block:: bash
 
@@ -26,7 +26,7 @@ Run a standard preprocessing pipeline using NanoPrePro as follows:
       --filter_lowq 7 \
       --report report.html
 
-This command performs the following preprocessing steps and 
+This command performs the following pre-processing steps and 
 generates a report file (:code:`report.html`):
 
 1. :code:`--beta 0.2`: performs :math:`F_{\beta=0.2}` optimization for adapter/primer alignment cutoffs (see :ref:`Step 1 <f_beta_optimization>`).
@@ -36,7 +36,7 @@ generates a report file (:code:`report.html`):
 5. :code:`--orientation 1`: reorients reads to sense strand (see :ref:`Step 5 <reorient>`).
 6. :code:`--filter_lowq 7`: filters low-quality (avg. Q-score < 7) reads (see :ref:`Step 6 <read_filter>`).
 
-Preprocessing Pipeline
+pre-processing Pipeline
 ----------------------
 
 .. _f_beta_optimization:
@@ -103,7 +103,7 @@ Step 3. Adapter/Primer Trimming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This step is activated with :code:`--trim_adapter`.  
-It removes flanking (5' and/or 3') adapter/primer sequences from the output reads.
+It trims adapter/primer sequences from the output reads.
 
 .. note::
 
@@ -117,12 +117,17 @@ Step 4. Poly(A/T) Trimming
 This step is activated with :code:`--trim_poly`.  
 The expected length, location, and nucleotide of mono-polymers are assigned along with the primer sequence.
 
-Use a pattern like :code:`N{M}` to specify the location and length of polyA/T tails. 
+Use a pattern like :code:`N{M}` to specify the location and length of poly(A/T) tails. 
 For example, this command tells NanoPrePro that poly :code:`A` tails of up to :code:`20` nucleotides are adjacent to the 3' adapters/primers:
 
 .. code::
 
    --p3_sense A{20}GCAATGA
+
+NanoPrePro then use a sliding window approach to identify and trim poly(A/T) sequences.
+The window size is set by :code:`--poly_w <int>` (default: 6).
+The minimum number of :code:`A` or :code:`T` bases in the window is set by :code:`--poly_k <int>` (default: 4).
+The length of poly(A/T) tails would be recorded in the ID line of each read (see :ref:`Output Documentation<per_read_annotation>`).
 
 .. note::
 
@@ -159,7 +164,7 @@ Step 7. Output
 NanoPrePro produces:
 
 - **FASTQ**: processed reads  
-- **HTML report**: summary of preprocessing statistics
+- **HTML report**: summary of pre-processing statistics
 
 **FASTQ Files**  
 
@@ -172,7 +177,7 @@ Output file names can be assigned with :code:`--output_full_length`, :code:`--ou
    :code:`--output_full_length output.fq.gz`
 
 Per-read annotations are appended to FASTQ read IDs.  
-See :ref:`output<per_read_annotation>` for details.
+See :ref:`Output Documentation<per_read_annotation>` for details.
 
 **HTML Report**  
 
@@ -180,4 +185,4 @@ Written to the file specified by :code:`--report`.
 The report includes Q-score distributions, the proportion of full-length/truncated/chimeric reads, and adapter/primer alignment results from :math:`F_{\beta}` optimization.
 
 The simulated alignment results help users manually picking cutoffs. 
-See :ref:`output<guideline>` for guidelines on manually selecting alignment cutoffs based on simulated alignment data.
+See :ref:`Output Documentation<guideline>` for guidelines on manually selecting alignment cutoffs based on simulated alignment data.

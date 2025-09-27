@@ -4,14 +4,14 @@ Output
 NanoPrePro produces two main outputs:
 
 - **Processed FASTQ** with per-read annotations
-- **HTML report** summarizing preprocessing results
+- **HTML report** summarizing pre-processing results
 
 .. _per_read_annotation:
 
 Processed FASTQ
 ---------------
 
-NanoPrePro appends preprocessing annotations to the FASTQ read IDs.  
+NanoPrePro appends pre-processing annotations to the FASTQ read IDs.  
 These annotations use standardized flags, summarized below:
 
 
@@ -51,7 +51,7 @@ This example shows that *read_1* is:
 HTML Report
 -----------
 
-The HTML report provides an overview of preprocessing results, including:
+The HTML report provides an overview of pre-processing results, including:
 
 - Quality score histograms  
 - Proportion of filtered/passed full-length, truncated, and chimeric reads  
