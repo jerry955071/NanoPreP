@@ -1,7 +1,7 @@
-Usage
+Implementation
 =====
 
-Quick Start
+Quick start
 -----------
 
 Suppose your sequence library looks like this:
@@ -36,12 +36,12 @@ generates a report file (:code:`report.html`):
 5. :code:`--orientation 1`: reorients reads to sense strand (see :ref:`Step 5 <reorient>`).
 6. :code:`--filter_lowq 7`: filters low-quality (avg. Q-score < 7) reads (see :ref:`Step 6 <read_filter>`).
 
-pre-processing Pipeline
+Pre-processing Pipeline
 ----------------------
 
 .. _f_beta_optimization:
 
-Step 1. :math:`F_{\beta}` Optimization
+Step 1. :math:`F_{\beta}` optimization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 NanoPrePro optimizes adapter/primer alignment cutoffs by:
@@ -82,7 +82,7 @@ The alignment cutoff values achieving the highest :math:`F_{\beta}` score are us
 
 .. _read_classification:
 
-Step 2. Full-Length / Truncated / Chimeric Read Classification
+Step 2. Full-Length / truncated / chimeric read classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Reads are classified into three categories based on adapter/primer alignment results:
@@ -99,7 +99,7 @@ Output files for each read type can be specified using:
 
 .. _trim_ap:
 
-Step 3. Adapter/Primer Trimming
+Step 3. Adapter/Primer trimming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This step is activated with :code:`--trim_adapter`.  
@@ -111,7 +111,7 @@ It trims adapter/primer sequences from the output reads.
 
 .. _trim_poly:
 
-Step 4. Poly(A/T) Trimming
+Step 4. Poly(A/T) trimming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This step is activated with :code:`--trim_poly`.  
@@ -136,7 +136,7 @@ The length of poly(A/T) tails would be recorded in the ID line of each read (see
 
 .. _reorient:
 
-Step 5. Read Reorientation
+Step 5. Read reorientation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Read strands are determined based on the orientation of aligned adapters/primers.  
@@ -151,7 +151,7 @@ Reorientation can be performed using :code:`--orientation 1/-1/0`:
 
 .. _read_filter:
 
-Step 6. Filtering Low-Quality Reads
+Step 6. Filtering low-quality reads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Average Q-scores are calculated after trimming adapter/primer/polyA(T) sequences (if applied).  

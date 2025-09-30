@@ -48,7 +48,7 @@ This example shows that *read_1* is:
 
 .. _html_report:
 
-HTML Report
+HTML report
 -----------
 
 The HTML report provides an overview of pre-processing results, including:
