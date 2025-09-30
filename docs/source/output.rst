@@ -1,4 +1,4 @@
-Output Documentation
+Output
 ======
 
 NanoPrePro produces two types of output files:

@@ -36,7 +36,7 @@ generates a report file (:code:`report.html`):
 5. :code:`--orientation 1`: reorients reads to sense strand (see :ref:`Step 5 <reorient>`).
 6. :code:`--filter_lowq 7`: filters low-quality (avg. Q-score < 7) reads (see :ref:`Step 6 <read_filter>`).
 
-Pre-processing Pipeline
+Pre-processing pipeline
 ----------------------
 
 .. _f_beta_optimization:
@@ -82,7 +82,7 @@ The alignment cutoff values achieving the highest :math:`F_{\beta}` score are us
 
 .. _read_classification:
 
-Step 2. Full-Length / truncated / chimeric read classification
+Step 2. Full-Length/truncated/chimeric read classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Reads are classified into three categories based on adapter/primer alignment results:
